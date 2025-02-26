@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChatWidget } from '../Chat/ChatWidget';
 import { Layout, Menu, Button, Space, theme, Dropdown } from 'antd';
 import {
   BuildOutlined,
@@ -148,6 +149,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <StyledContent>
         {children}
       </StyledContent>
+      <ChatWidget />
     </StyledLayout>
   );
 };
