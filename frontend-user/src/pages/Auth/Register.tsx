@@ -60,7 +60,7 @@ const Register: React.FC = () => {
       <StyledCard>
         <LogoContainer>
           <Title level={2}>Office Plus</Title>
-          <Title level={4}>Create Your Account</Title>
+          <Title level={4}>创建你的账户</Title>
         </LogoContainer>
 
         <Form
@@ -73,13 +73,13 @@ const Register: React.FC = () => {
           <Form.Item
             name="username"
             rules={[
-              { required: true, message: 'Please input your username!' },
-              { min: 3, message: 'Username must be at least 3 characters' }
+              { required: true, message: '请输入用户名!' },
+              { min: 3, message: '用户名长度至少为3个字符' }
             ]}
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="Username"
+              placeholder="用户名"
               size="large"
             />
           </Form.Item>
@@ -87,13 +87,13 @@ const Register: React.FC = () => {
           <Form.Item
             name="email"
             rules={[
-              { required: true, message: 'Please input your email!' },
-              { type: 'email', message: 'Please enter a valid email!' }
+              { required: true, message: '请输入你的邮箱!' },
+              { type: 'email', message: '请输入一个正确的邮箱!' }
             ]}
           >
             <Input
               prefix={<MailOutlined />}
-              placeholder="Email"
+              placeholder="邮箱"
               size="large"
             />
           </Form.Item>
@@ -101,13 +101,13 @@ const Register: React.FC = () => {
           <Form.Item
             name="password"
             rules={[
-              { required: true, message: 'Please input your password!' },
-              { min: 6, message: 'Password must be at least 6 characters' }
+              { required: true, message: '请输入你的密码!' },
+              { min: 6, message: '密码至少是6个字符' }
             ]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="Password"
+              placeholder="密码"
               size="large"
             />
           </Form.Item>
@@ -116,20 +116,20 @@ const Register: React.FC = () => {
             name="confirmPassword"
             dependencies={['password']}
             rules={[
-              { required: true, message: 'Please confirm your password!' },
+              { required: true, message: '请确认你的密码!' },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue('password') === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error('Passwords do not match!'));
+                  return Promise.reject(new Error('密码不匹配!'));
                 },
               }),
             ]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="Confirm Password"
+              placeholder="确认密码"
               size="large"
             />
           </Form.Item>
@@ -142,12 +142,12 @@ const Register: React.FC = () => {
                 validator: (_, value) =>
                   value
                     ? Promise.resolve()
-                    : Promise.reject(new Error('Please accept the terms and conditions')),
+                    : Promise.reject(new Error('请同意隐私政策和用户协议')),
               },
             ]}
           >
             <Checkbox>
-              I have read and agree to the <a href="#">Terms and Conditions</a>
+              我已阅读和同意<a href="#">隐私政策和用户协议</a>
             </Checkbox>
           </Form.Item>
 
@@ -159,12 +159,12 @@ const Register: React.FC = () => {
               block
               loading={isLoading}
             >
-              Register
+              注册
             </Button>
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0, textAlign: 'center' }}>
-            Already have an account? <Link to="/login">Login now</Link>
+            已经有账户了? <Link to="/login">点我登陆</Link>
           </Form.Item>
         </Form>
       </StyledCard>

@@ -54,7 +54,7 @@ const Login: React.FC = () => {
       <StyledCard>
         <LogoContainer>
           <Title level={2}>Office Plus</Title>
-          <Title level={4}>Find Your Perfect Office Space</Title>
+          <Title level={4}>寻找您理想的办公地点</Title>
         </LogoContainer>
 
         <Form
@@ -66,24 +66,24 @@ const Login: React.FC = () => {
           <Form.Item
             name="email"
             rules={[
-              { required: true, message: 'Please input your email!' },
-              { type: 'email', message: 'Please enter a valid email!' }
+              { required: true, message: '请输入你的邮箱' },
+              { type: 'email', message: '请输入一个合理的邮箱' }
             ]}
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="Email"
+              placeholder="邮箱"
               size="large"
             />
           </Form.Item>
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: 'Please input your password!' }]}
+            rules={[{ required: true, message: '请输入你的密码' }]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="Password"
+              placeholder="密码"
               size="large"
             />
           </Form.Item>
@@ -101,7 +101,7 @@ const Login: React.FC = () => {
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0, textAlign: 'center' }}>
-            Don't have an account? <Link to="/register">Register now</Link>
+            还没有账户? <Link to="/register">点我注册</Link>
           </Form.Item>
         </Form>
       </StyledCard>
