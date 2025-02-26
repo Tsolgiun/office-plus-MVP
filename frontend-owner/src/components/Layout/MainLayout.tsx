@@ -60,17 +60,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     {
       key: 'dashboard',
       icon: <HomeOutlined />,
-      label: <Link to="/dashboard">Dashboard</Link>,
+      label: <Link to="/dashboard">数据面板</Link>,
     },
     {
       key: 'buildings',
       icon: <BuildOutlined />,
-      label: <Link to="/buildings">Buildings</Link>,
+      label: <Link to="/buildings">写字楼</Link>,
     },
     {
       key: 'offices',
       icon: <AppstoreOutlined />,
-      label: <Link to="/offices">All Offices</Link>,
+      label: <Link to="/offices">所有的办公室</Link>,
     },
   ];
 

@@ -84,36 +84,36 @@ const AllOffices: React.FC = () => {
 
   const columns = [
     {
-      title: 'Building',
+      title: '写字楼',
       dataIndex: 'buildingName',
       key: 'buildingName',
     },
     {
-      title: 'Floor',
+      title: '楼层',
       dataIndex: 'floor',
       key: 'floor',
       render: (floor: number) => `${floor}F`,
     },
     {
-      title: 'Area',
+      title: '面积',
       dataIndex: 'area',
       key: 'area',
       render: (area: number) => `${area}㎡`,
     },
     {
-      title: 'Price',
+      title: '单价',
       dataIndex: 'pricePerUnit',
       key: 'pricePerUnit',
       render: (price: number) => `¥${price}/㎡/月`,
     },
     {
-      title: 'Total Price',
+      title: '总价',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
       render: (price: number) => `¥${price}/月`,
     },
     {
-      title: 'Status',
+      title: '状态',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
@@ -128,13 +128,13 @@ const AllOffices: React.FC = () => {
     <Card>
       <Space direction="vertical" style={{ width: '100%' }} size="large">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Title level={2}>All Offices</Title>
+          <Title level={2}>所有的办公室</Title>
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={showModal}
           >
-            Add Office
+            添加办公室
           </Button>
         </div>
 
@@ -154,11 +154,11 @@ const AllOffices: React.FC = () => {
         />
 
         <Modal
-          title="Select Building"
+          title="选择写字楼"
           open={isModalVisible}
           onOk={handleCreate}
           onCancel={handleCancel}
-          okText="Create Office"
+          okText="添加办公室"
         >
           <Select
             placeholder="Select a building"

@@ -49,12 +49,12 @@ const Buildings: React.FC = () => {
 
   const columns = [
     {
-      title: 'Name',
+      title: '名字',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Location',
+      title: '地址',
       dataIndex: 'location',
       key: 'location',
       render: (location: { address: string; metro: string }) => (
@@ -65,7 +65,7 @@ const Buildings: React.FC = () => {
       ),
     },
     {
-      title: 'Price Range',
+      title: '价格范围',
       dataIndex: 'priceRange',
       key: 'priceRange',
       render: (range: { min: number; max: number }) => (
@@ -73,7 +73,7 @@ const Buildings: React.FC = () => {
       ),
     },
     {
-      title: 'Area Range',
+      title: '面积范围',
       dataIndex: 'areaRange',
       key: 'areaRange',
       render: (range: { min: number; max: number }) => (
@@ -81,7 +81,7 @@ const Buildings: React.FC = () => {
       ),
     },
     {
-      title: 'Tags',
+      title: '标签',
       key: 'tags',
       dataIndex: 'tags',
       render: (tags: string[]) => (
@@ -93,7 +93,7 @@ const Buildings: React.FC = () => {
       ),
     },
     {
-      title: 'Actions',
+      title: '行动',
       key: 'action',
       render: (_: any, record: Building) => (
         <Space size="middle">
@@ -137,7 +137,7 @@ const Buildings: React.FC = () => {
             icon={<PlusOutlined />}
             onClick={() => navigate('/buildings/new')}
           >
-            Add Building
+            添加写字楼
           </Button>
         </div>
 

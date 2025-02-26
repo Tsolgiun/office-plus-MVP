@@ -46,7 +46,7 @@ const EditBuilding: React.FC = () => {
 
   return (
     <Card>
-      <Title level={2}>Edit Building</Title>
+      <Title level={2}>更新写字楼</Title>
       <BuildingForm mode="edit" initialValues={building} />
     </Card>
   );
