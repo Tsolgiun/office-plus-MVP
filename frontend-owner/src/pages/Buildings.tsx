@@ -131,7 +131,7 @@ const Buildings: React.FC = () => {
     <Card>
       <Space direction="vertical" style={{ width: '100%' }} size="large">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Title level={2}>Buildings</Title>
+          <Title level={2}>写字楼</Title>
           <Button
             type="primary"
             icon={<PlusOutlined />}
