@@ -1,9 +1,7 @@
 import React from 'react';
 import { Layout, Menu, Button, Space, theme, Dropdown } from 'antd';
 import {
-  HomeOutlined,
   BuildOutlined,
-  SearchOutlined,
   HeartOutlined,
   CalendarOutlined,
   UserOutlined,
@@ -38,6 +36,20 @@ const Logo = styled(Link)`
   margin-right: 48px;
 `;
 
+const StyledMenu = styled(Menu)`
+  .ant-menu-item {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 4px;
+    
+    a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+`;
+
 const StyledContent = styled(Content)`
   margin-top: 64px;
   padding: 24px;
@@ -57,11 +69,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const menuItems = [
     {
-      key: 'home',
-      icon: <HomeOutlined />,
-      label: <Link to="/home">Home</Link>,
-    },
-    {
       key: 'buildings',
       icon: <BuildOutlined />,
       label: <Link to="/buildings">Buildings</Link>,
@@ -70,11 +77,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       key: 'offices',
       icon: <BuildOutlined />,
       label: <Link to="/offices">Offices</Link>,
-    },
-    {
-      key: 'search',
-      icon: <SearchOutlined />,
-      label: <Link to="/search">Search</Link>,
     },
   ];
 
@@ -101,16 +103,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <StyledHeader>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Logo to="/">Office Plus</Logo>
-          <Menu
+          <StyledMenu
             mode="horizontal"
-            selectedKeys={[location.pathname.split('/')[1] || 'home']}
+            selectedKeys={[location.pathname.split('/')[1] || 'buildings']}
             items={menuItems}
           />
         </div>
         <Space>
           {isLoggedIn ? (
             <Space>
-              <Menu
+              <StyledMenu
                 mode="horizontal"
                 selectedKeys={[location.pathname.split('/')[1]]}
                 items={userMenuItems}

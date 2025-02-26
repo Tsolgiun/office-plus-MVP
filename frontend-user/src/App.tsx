@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ConfigProvider, Spin } from 'antd';
 import { ThemeProvider } from 'styled-components';
 import MainLayout from './components/Layout/MainLayout';
-import Home from './pages/Home';
 import Buildings from './pages/Buildings';
 import Offices from './pages/Offices';
 import Login from './pages/Auth/Login';
@@ -47,15 +46,13 @@ const App: React.FC = () => {
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 {/* Public Routes */}
-                <Route path="/" element={<Navigate to="/home" replace />} />
-                <Route path="/home" element={<Home />} />
+                <Route path="/" element={<Navigate to="/buildings" replace />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/buildings" element={<Buildings />} />
                 <Route path="/buildings/:id" element={<BuildingDetail />} />
                 <Route path="/buildings/:buildingId/offices/:officeId" element={<OfficeDetail />} />
                 <Route path="/offices" element={<Offices />} />
-                <Route path="/search" element={<div>Search</div>} />
                 
                 {/* Protected Routes */}
                 <Route path="/favorites" element={<ProtectedRoute><div>Favorites</div></ProtectedRoute>} />

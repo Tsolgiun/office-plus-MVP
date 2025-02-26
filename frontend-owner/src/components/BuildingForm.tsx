@@ -52,8 +52,22 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
     }
   };
 
-  const handleImagesChange = (photos: string[]) => {
+  const handleImagesChange = async (photos: string[]) => {
     form.setFieldValue('photos', photos);
+    
+    if (mode === 'create' && buildingId) {
+      try {
+        // Fetch fresh building data after upload
+        const building = await api.getBuildingById(buildingId);
+        form.setFieldsValue({
+          ...building,
+          photos: building.photos
+        });
+        message.success('Image preview updated');
+      } catch (error) {
+        console.error('Error fetching updated building data:', error);
+      }
+    }
   };
 
   const grades = ['A', 'A+', 'B', 'B+', 'C'];
@@ -168,42 +182,6 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
         </Select>
       </Form.Item>
 
-      {mode === 'create' ? (
-        buildingId && (
-          <Form.Item
-            name="photos"
-            label="Building Photos"
-          >
-            <div>
-              <p>Building created successfully! You can now upload images.</p>
-              <ImageUpload
-                photos={form.getFieldValue('photos') || []}
-                onImagesChange={handleImagesChange}
-                endpoint={`/buildings/${buildingId}/images`}
-              />
-              <Button 
-                type="primary" 
-                onClick={() => navigate('/buildings', { replace: true })}
-                style={{ marginTop: 16 }}
-              >
-                Done - Go to Buildings List
-              </Button>
-            </div>
-          </Form.Item>
-        )
-      ) : (
-        <Form.Item
-          name="photos"
-          label="Building Photos"
-        >
-          <ImageUpload
-            photos={form.getFieldValue('photos') || []}
-            onImagesChange={handleImagesChange}
-            endpoint={`/buildings/${initialValues?._id}/images`}
-          />
-        </Form.Item>
-      )}
-
       <Form.List name="amenities">
         {(fields, { add, remove }) => (
           <Form.Item label="便利设施">
@@ -272,16 +250,66 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
         )}
       </Form.List>
 
-      <Form.Item>
-        <Space>
-          <Button type="primary" htmlType="submit" loading={loading}>
-            {mode === 'create' ? '创建写字楼' : '更新写字楼'}
-          </Button>
-          <Button onClick={() => navigate('/buildings', { replace: true })}>
-            取消
-          </Button>
-        </Space>
-      </Form.Item>
+      {mode === 'create' && !buildingId && (
+        <Form.Item>
+          <Space>
+            <Button type="primary" htmlType="submit" loading={loading}>
+              创建写字楼
+            </Button>
+            <Button onClick={() => navigate('/buildings', { replace: true })}>
+              取消
+            </Button>
+          </Space>
+        </Form.Item>
+      )}
+
+      {mode === 'create' ? (
+        buildingId && (
+          <Form.Item
+            name="photos"
+            label="Building Photos"
+          >
+            <div>
+              <p>Building created successfully! You can now upload images.</p>
+              <ImageUpload
+                photos={form.getFieldValue('photos') || []}
+                onImagesChange={handleImagesChange}
+                endpoint={`/buildings/${buildingId}/images`}
+              />
+              <Button 
+                type="primary" 
+                onClick={() => navigate('/buildings', { replace: true })}
+                style={{ marginTop: 16 }}
+              >
+                Done - Go to Buildings List
+              </Button>
+            </div>
+          </Form.Item>
+        )
+      ) : (
+        <>
+          <Form.Item
+            name="photos"
+            label="Building Photos"
+          >
+            <ImageUpload
+              photos={form.getFieldValue('photos') || []}
+              onImagesChange={handleImagesChange}
+              endpoint={`/buildings/${initialValues?._id}/images`}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                更新写字楼
+              </Button>
+              <Button onClick={() => navigate('/buildings', { replace: true })}>
+                取消
+              </Button>
+            </Space>
+          </Form.Item>
+        </>
+      )}
     </Form>
   );
 };
