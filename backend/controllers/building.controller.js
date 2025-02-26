@@ -1,11 +1,17 @@
 const Building = require('../models/building.model');
+const cloudinary = require('../config/cloudinary');
 
 // Create new building
 const createBuilding = async (req, res) => {
+  // Get Cloudinary URLs from multer middleware
+  const photos = req.files ? req.files.map(file => file.path) : [];
+  console.log('Create Building - Uploaded files:', JSON.stringify(req.files, null, 2));
+  console.log('Create Building - Photos array:', photos);
   try {
     const building = new Building({
       ...req.body,
-      owner: req.user._id
+      owner: req.user._id,
+      photos
     });
 
     await building.save();
@@ -58,6 +64,77 @@ const getBuildingById = async (req, res) => {
 };
 
 // Update building
+// Upload images for existing building
+const uploadImages = async (req, res) => {
+  try {
+    const building = await Building.findOne({
+      _id: req.params.id,
+      owner: req.user._id
+    });
+
+    if (!building) {
+      return res.status(404).json({ message: 'Building not found' });
+    }
+
+    // Get Cloudinary URLs from multer middleware
+    console.log('Upload Images - Request files:', JSON.stringify(req.files, null, 2));
+    console.log('Upload Images - File paths:', req.files?.map(f => f.path));
+    
+    const newPhotos = req.files ? req.files.map(file => file.path) : [];
+    console.log('Upload Images - New photos array:', newPhotos);
+    
+    // Add new photos to existing ones
+    building.photos = [...(building.photos || []), ...newPhotos];
+    await building.save();
+
+    res.json({
+      message: 'Images uploaded successfully',
+      photos: building.photos
+    });
+  } catch (error) {
+    console.error('Upload Images - Error:', error);
+    res.status(500).json({
+      message: 'Error uploading images',
+      error: error.message,
+      details: error.stack
+    });
+  }
+};
+
+// Delete image from building
+const deleteImage = async (req, res) => {
+  try {
+    const { id, imageUrl } = req.params;
+    
+    const building = await Building.findOne({
+      _id: id,
+      owner: req.user._id
+    });
+
+    if (!building) {
+      return res.status(404).json({ message: 'Building not found' });
+    }
+
+    // Remove image from Cloudinary
+    const publicId = imageUrl.split('/').pop().split('.')[0];
+    await cloudinary.uploader.destroy(publicId);
+
+    // Remove image URL from building
+    building.photos = building.photos.filter(photo => photo !== imageUrl);
+    await building.save();
+
+    res.json({
+      message: 'Image deleted successfully',
+      photos: building.photos
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error deleting image',
+      error: error.message
+    });
+  }
+};
+
 const updateBuilding = async (req, res) => {
   try {
     const building = await Building.findOne({
@@ -172,5 +249,7 @@ module.exports = {
   getBuildingById,
   updateBuilding,
   deleteBuilding,
-  searchBuildings
+  searchBuildings,
+  uploadImages,
+  deleteImage
 };

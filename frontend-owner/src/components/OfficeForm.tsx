@@ -4,6 +4,7 @@ import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Office } from '../types/models';
 import { api } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import ImageUpload from './ImageUpload';
 
 interface OfficeFormProps {
   buildingId: string;
@@ -21,6 +22,7 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [officeId, setOfficeId] = useState<string | null>(initialValues?._id || null);
 
   useEffect(() => {
     if (initialValues) {
@@ -37,6 +39,10 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
     }
   };
 
+  const handleImagesChange = (photos: string[]) => {
+    form.setFieldValue('photos', photos);
+  };
+
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
@@ -50,8 +56,10 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
       };
 
       if (mode === 'create') {
-        await api.createOffice(officeData);
-        message.success('Office created successfully');
+        const response = await api.createOffice(officeData);
+        setOfficeId(response._id);
+        message.success('Office created successfully. You can now upload images.');
+        // Don't navigate away in create mode - allow image upload first
       } else {
         if (!initialValues?._id) {
           throw new Error('Office ID not found');
@@ -59,8 +67,10 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
         await api.updateOffice(initialValues._id, officeData);
         message.success('Office updated successfully');
       }
-      onSuccess?.();
-      navigate(`/buildings/${buildingId}/offices`);
+      if (mode === 'edit') {
+        onSuccess?.();
+        navigate(`/buildings/${buildingId}/offices`);
+      }
     } catch (error) {
       console.error('Error saving office:', error);
       message.error('Error saving office. Please try again.');
@@ -215,6 +225,42 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
           <Select.Option value="maintenance">Maintenance</Select.Option>
         </Select>
       </Form.Item>
+
+      {mode === 'create' ? (
+        officeId && (
+          <Form.Item
+            name="photos"
+            label="Office Photos"
+          >
+            <div>
+              <p>Office created successfully! You can now upload images.</p>
+              <ImageUpload
+                photos={form.getFieldValue('photos') || []}
+                onImagesChange={handleImagesChange}
+                endpoint={`/offices/${officeId}/images`}
+              />
+              <Button 
+                type="primary" 
+                onClick={() => navigate(`/buildings/${buildingId}/offices`, { replace: true })}
+                style={{ marginTop: 16 }}
+              >
+                Done - Go to Offices List
+              </Button>
+            </div>
+          </Form.Item>
+        )
+      ) : (
+        <Form.Item
+          name="photos"
+          label="Office Photos"
+        >
+          <ImageUpload
+            photos={form.getFieldValue('photos') || []}
+            onImagesChange={handleImagesChange}
+            endpoint={`/offices/${initialValues?._id}/images`}
+          />
+        </Form.Item>
+      )}
 
       <Form.List name="tags">
         {(fields, { add, remove }) => (

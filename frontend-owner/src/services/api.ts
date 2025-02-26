@@ -127,18 +127,40 @@ class ApiService {
     return response.data;
   }
 
-  // Upload endpoints (to be implemented when file upload is added)
-  async uploadPhotos(files: File[]): Promise<string[]> {
-    const formData = new FormData();
-    files.forEach((file) => formData.append('photos', file));
-    
-    const response: AxiosResponse<{ urls: string[] }> = await this.api.post('/upload/photos', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    
-    return response.data.urls;
+  // Building image endpoints
+  async uploadBuildingPhotos(buildingId: string, photos: FormData): Promise<string[]> {
+    const response: AxiosResponse<{ photos: string[] }> = await this.api.post(
+      `/buildings/${buildingId}/images`,
+      photos,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data.photos;
+  }
+
+  async deleteBuildingPhoto(buildingId: string, photoUrl: string): Promise<void> {
+    await this.api.delete(`/buildings/${buildingId}/images/${encodeURIComponent(photoUrl)}`);
+  }
+
+  // Office image endpoints
+  async uploadOfficePhotos(officeId: string, photos: FormData): Promise<string[]> {
+    const response: AxiosResponse<{ photos: string[] }> = await this.api.post(
+      `/offices/${officeId}/images`,
+      photos,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data.photos;
+  }
+
+  async deleteOfficePhoto(officeId: string, photoUrl: string): Promise<void> {
+    await this.api.delete(`/offices/${officeId}/images/${encodeURIComponent(photoUrl)}`);
   }
 }
 

@@ -45,6 +45,19 @@ export interface Office {
   lastUpdated: Date;
 }
 
+export interface ApiError {
+  message: string;
+  error?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  totalPages: number;
+  hasMore: boolean;
+}
+
 export interface AuthResponse {
   token: string;
   user: User;

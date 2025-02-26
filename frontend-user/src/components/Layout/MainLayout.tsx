@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Menu, Button, Space, theme } from 'antd';
+import { Layout, Menu, Button, Space, theme, Dropdown } from 'antd';
 import {
   HomeOutlined,
   BuildOutlined,
@@ -7,9 +7,11 @@ import {
   HeartOutlined,
   CalendarOutlined,
   UserOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useAuthStore } from '../../store/authStore';
 
 const { Header, Content } = Layout;
 
@@ -51,7 +53,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   theme.useToken(); // Initialize theme token
   const location = useLocation();
   const navigate = useNavigate();
-  const isLoggedIn = false; // TODO: Replace with actual auth state
+  const { isLoggedIn, logout, user } = useAuthStore();
 
   const menuItems = [
     {
@@ -107,11 +109,28 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </div>
         <Space>
           {isLoggedIn ? (
-            <Menu
-              mode="horizontal"
-              selectedKeys={[location.pathname.split('/')[1]]}
-              items={userMenuItems}
-            />
+            <Space>
+              <Menu
+                mode="horizontal"
+                selectedKeys={[location.pathname.split('/')[1]]}
+                items={userMenuItems}
+              />
+              <Dropdown menu={{
+                items: [{
+                  key: 'logout',
+                  icon: <LogoutOutlined />,
+                  label: 'Logout',
+                  onClick: () => {
+                    logout();
+                    navigate('/');
+                  }
+                }]
+              }}>
+                <Button type="text" icon={<UserOutlined />}>
+                  {user?.username}
+                </Button>
+              </Dropdown>
+            </Space>
           ) : (
             <Space>
               <Button type="text" onClick={() => navigate('/login')}>

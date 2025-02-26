@@ -1,10 +1,14 @@
 const Office = require('../models/office.model');
 const Building = require('../models/building.model');
+const cloudinary = require('../config/cloudinary');
 
 // Create new office
 const createOffice = async (req, res) => {
   try {
-    // Verify building belongs to user
+    // Get image URLs from multer middleware
+    const photos = req.files ? req.files.map(file => file.path) : [];
+
+    // Verify building exists and user owns it
     const building = await Building.findOne({
       _id: req.body.buildingId,
       owner: req.user._id
@@ -14,7 +18,10 @@ const createOffice = async (req, res) => {
       return res.status(404).json({ message: 'Building not found' });
     }
 
-    const office = new Office(req.body);
+    const office = new Office({
+      ...req.body,
+      photos
+    });
     await office.save();
 
     res.status(201).json({
@@ -83,6 +90,83 @@ const getOfficeById = async (req, res) => {
 };
 
 // Update office
+// Upload images for existing office
+const uploadImages = async (req, res) => {
+  try {
+    // First verify user owns the building that contains this office
+    const office = await Office.findById(req.params.id);
+    if (!office) {
+      return res.status(404).json({ message: 'Office not found' });
+    }
+
+    const building = await Building.findOne({
+      _id: office.buildingId,
+      owner: req.user._id
+    });
+
+    if (!building) {
+      return res.status(404).json({ message: 'Building not found or not authorized' });
+    }
+
+    // Get new image URLs
+    const newPhotos = req.files ? req.files.map(file => file.path) : [];
+    
+    // Add new photos to existing ones
+    office.photos = [...office.photos, ...newPhotos];
+    await office.save();
+
+    res.json({
+      message: 'Images uploaded successfully',
+      photos: office.photos
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error uploading images',
+      error: error.message
+    });
+  }
+};
+
+// Delete image from office
+const deleteImage = async (req, res) => {
+  try {
+    const { id, imageUrl } = req.params;
+    
+    // Verify user owns the building that contains this office
+    const office = await Office.findById(id);
+    if (!office) {
+      return res.status(404).json({ message: 'Office not found' });
+    }
+
+    const building = await Building.findOne({
+      _id: office.buildingId,
+      owner: req.user._id
+    });
+
+    if (!building) {
+      return res.status(404).json({ message: 'Building not found or not authorized' });
+    }
+
+    // Remove image from Cloudinary
+    const publicId = imageUrl.split('/').pop().split('.')[0];
+    await cloudinary.uploader.destroy(publicId);
+
+    // Remove image URL from office
+    office.photos = office.photos.filter(photo => photo !== imageUrl);
+    await office.save();
+
+    res.json({
+      message: 'Image deleted successfully',
+      photos: office.photos
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error deleting image',
+      error: error.message
+    });
+  }
+};
+
 const updateOffice = async (req, res) => {
   try {
     const office = await Office.findById(req.params.id);
@@ -291,5 +375,7 @@ module.exports = {
   updateOffice,
   deleteOffice,
   searchOffices,
-  searchPublicOffices
+  searchPublicOffices,
+  uploadImages,
+  deleteImage
 };
