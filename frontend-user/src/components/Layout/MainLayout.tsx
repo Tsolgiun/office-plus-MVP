@@ -71,12 +71,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     {
       key: 'buildings',
       icon: <BuildOutlined />,
-      label: <Link to="/buildings">Buildings</Link>,
+      label: <Link to="/buildings">写字楼</Link>,
     },
     {
       key: 'offices',
       icon: <BuildOutlined />,
-      label: <Link to="/offices">Offices</Link>,
+      label: <Link to="/offices">办公室</Link>,
     },
   ];
 
@@ -84,17 +84,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     {
       key: 'favorites',
       icon: <HeartOutlined />,
-      label: <Link to="/favorites">Favorites</Link>,
+      label: <Link to="/favorites">收藏</Link>,
     },
     {
       key: 'appointments',
       icon: <CalendarOutlined />,
-      label: <Link to="/appointments">Appointments</Link>,
+      label: <Link to="/appointments">预约</Link>,
     },
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: <Link to="/profile">Profile</Link>,
+      label: <Link to="/profile">个人资料</Link>,
     },
   ] : [];
 
