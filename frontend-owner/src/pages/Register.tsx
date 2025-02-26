@@ -138,7 +138,7 @@ const Register: React.FC = () => {
               block
               loading={isLoading}
             >
-              Register
+              注册
             </Button>
           </Form.Item>
 

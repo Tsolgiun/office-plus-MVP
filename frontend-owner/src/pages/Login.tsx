@@ -96,7 +96,7 @@ const Login: React.FC = () => {
               block
               loading={isLoading}
             >
-              Log in
+              登录
             </Button>
           </Form.Item>
 

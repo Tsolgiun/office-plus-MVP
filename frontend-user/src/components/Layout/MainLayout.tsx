@@ -134,10 +134,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           ) : (
             <Space>
               <Button type="text" onClick={() => navigate('/login')}>
-                Login
+                登陆
               </Button>
               <Button type="primary" onClick={() => navigate('/register')}>
-                Register
+                注册
               </Button>
             </Space>
           )}
