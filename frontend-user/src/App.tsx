@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ConfigProvider, Spin } from 'antd';
 import { ThemeProvider } from 'styled-components';
 import MainLayout from './components/Layout/MainLayout';
@@ -46,7 +46,7 @@ const App: React.FC = () => {
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 {/* Public Routes */}
-                <Route path="/" element={<Navigate to="/buildings" replace />} />
+                <Route path="/" element={<Buildings />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/buildings" element={<Buildings />} />
