@@ -119,7 +119,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 items: [{
                   key: 'logout',
                   icon: <LogoutOutlined />,
-                  label: 'Logout',
+                  label: '注销',
                   onClick: () => {
                     logout();
                     navigate('/');

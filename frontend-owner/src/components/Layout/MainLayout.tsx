@@ -78,13 +78,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: 'Profile',
+      label: '个人资料',
       onClick: () => navigate('/profile'),
     },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: 'Logout',
+      label: '注销',
       onClick: () => {
         logout();
         navigate('/login');

@@ -83,7 +83,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div>
-      <Title level={2}>Dashboard</Title>
+      <Title level={2}>数据面板</Title>
       
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={8}>
