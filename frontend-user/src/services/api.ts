@@ -5,12 +5,13 @@ class ApiService {
   private api: AxiosInstance;
   private static instance: ApiService;
   private readonly publicEndpoints = [
-    '/buildings',
-    '/buildings/',
+    '/buildings/public',
+    '/buildings/public/',
     '/offices/public',
-    '/buildings/search',
+    '/buildings/public/search',
     '/offices/public/',
     '/offices/public/building/',
+    '/offices/public/search'
   ];
 
   private isPublicEndpoint(url: string): boolean {
@@ -121,8 +122,6 @@ class ApiService {
     const response: AxiosResponse<User> = await this.api.get('/auth/profile');
     return response.data;
   }
-
-  // TODO: Add more endpoints as needed
 }
 
 export const api = ApiService.getInstance();

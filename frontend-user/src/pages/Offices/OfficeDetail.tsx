@@ -4,7 +4,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Typography, 
   Spin, 
-  Carousel, 
   Descriptions, 
   Tag, 
   Button, 
@@ -14,34 +13,109 @@ import {
   Form,
   Input,
   DatePicker,
-  message
+  message,
 } from 'antd';
 import { 
   EnvironmentOutlined, 
-  DollarOutlined, 
   HomeOutlined,
   TeamOutlined,
-  CalendarOutlined
+  CalendarOutlined,
+  LeftOutlined,
+  RightOutlined
 } from '@ant-design/icons';
 import styled from 'styled-components';
 import { Building, Office } from '../../types/models';
 import { api } from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { TextArea } = Input;
 
-const StyledCarousel = styled(Carousel)`
-  .slick-slide {
-    height: 400px;
-    overflow: hidden;
+const PageLayout = styled.div`
+  display: grid;
+  grid-template-columns: 60% 40%;
+  gap: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+`;
 
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+const MainColumn = styled.div`
+  width: 100%;
+`;
+
+const StickyColumn = styled.div`
+  position: sticky;
+  top: 24px;
+  height: fit-content;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+`;
+
+const ImageContainer = styled.div`
+  position: relative;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 12px;
+  margin-bottom: 24px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    .nav-buttons {
+      opacity: 1;
     }
   }
+`;
+
+const NavButton = styled(Button)`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 50% !important;
+  border: none !important;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0;
+
+  &:hover {
+    background: rgba(255, 255, 255, 1) !important;
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  &.prev {
+    left: 20px;
+  }
+
+  &.next {
+    right: 20px;
+  }
+`;
+
+const PhotoCounter = styled.div`
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  z-index: 1;
 `;
 
 const ContentSection = styled.div`
@@ -59,6 +133,17 @@ const TagContainer = styled.div`
   flex-wrap: wrap;
 `;
 
+const PriceText = styled(Title)`
+  margin-bottom: 8px !important;
+`;
+
+const BookingButton = styled(Button)`
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+  margin-top: 16px;
+`;
+
 const OfficeDetail: React.FC = () => {
   const { buildingId, officeId, id } = useParams<{ buildingId?: string; officeId?: string; id?: string }>();
   const navigate = useNavigate();
@@ -66,20 +151,19 @@ const OfficeDetail: React.FC = () => {
   const [building, setBuilding] = useState<Building | null>(null);
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [form] = Form.useForm();
   const { isLoggedIn } = useAuthStore();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Get the office data first
         const targetOfficeId = officeId || id;
         if (!targetOfficeId) return;
         
         const officeData = await api.getOfficeById(targetOfficeId);
         setOffice(officeData);
 
-        // Then get the building data using buildingId from either URL or office data
         const targetBuildingId = buildingId || officeData.buildingId;
         const buildingData = await api.getBuildingById(targetBuildingId);
         setBuilding(buildingData);
@@ -102,6 +186,24 @@ const OfficeDetail: React.FC = () => {
     setIsModalVisible(true);
   };
 
+  const handlePrevPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (office?.photos) {
+      setCurrentPhotoIndex(prev => 
+        prev === 0 ? office.photos.length - 1 : prev - 1
+      );
+    }
+  };
+
+  const handleNextPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (office?.photos) {
+      setCurrentPhotoIndex(prev => 
+        prev === office.photos.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
   interface BookingFormValues {
     date: Dayjs;
     time: string;
@@ -109,7 +211,6 @@ const OfficeDetail: React.FC = () => {
   }
 
   const handleSubmit = async (values: BookingFormValues) => {
-    // TODO: Implement booking submission
     console.log('Booking values:', values);
     message.success('Viewing request submitted successfully');
     setIsModalVisible(false);
@@ -130,7 +231,7 @@ const OfficeDetail: React.FC = () => {
 
   return (
     <div>
-      <Space style={{ marginBottom: 16 }}>
+      <Space style={{ marginBottom: 16, padding: '0 24px' }}>
         <Button type="link" onClick={() => navigate('/buildings')}>
           ← Back to Buildings
         </Button>
@@ -139,71 +240,94 @@ const OfficeDetail: React.FC = () => {
         </Button>
       </Space>
 
-      {office.photos && office.photos.length > 0 && (
-        <StyledCarousel autoplay>
-          {office.photos.map((photo, index) => (
-            <div key={index}>
-              <img src={photo} alt={`Office View ${index + 1}`} />
-            </div>
-          ))}
-        </StyledCarousel>
-      )}
+      <PageLayout>
+        <MainColumn>
+          {office.photos && office.photos.length > 0 && (
+            <ImageContainer>
+              <img 
+                src={office.photos[currentPhotoIndex]} 
+                alt={`Office View ${currentPhotoIndex + 1}`} 
+              />
+              <div className="nav-buttons">
+                <NavButton 
+                  className="prev" 
+                  icon={<LeftOutlined />} 
+                  onClick={handlePrevPhoto}
+                />
+                <NavButton 
+                  className="next" 
+                  icon={<RightOutlined />} 
+                  onClick={handleNextPhoto}
+                />
+              </div>
+              <PhotoCounter>
+                {currentPhotoIndex + 1} / {office.photos.length}
+              </PhotoCounter>
+            </ImageContainer>
+          )}
 
-      <ContentSection>
-        <Space align="center" style={{ marginBottom: 16 }}>
-          <Title level={2}>Floor {office.floor ?? 'Unknown'}</Title>
-          <Tag color={office.status === 'available' ? 'green' : 'orange'}>
-            {office.status || 'Unknown'}
-          </Tag>
-        </Space>
+          <ContentSection>
+            <Title level={2}>Office Details</Title>
+            <Descriptions column={1}>
+              <Descriptions.Item label="Building">
+                <EnvironmentOutlined /> {building.name || 'Unknown Building'}
+              </Descriptions.Item>
+              <Descriptions.Item label="Area">
+                <HomeOutlined /> {office.area ?? 0} ㎡
+              </Descriptions.Item>
+              <Descriptions.Item label="Capacity">
+                <TeamOutlined /> {office.capacity ?? 'N/A'} people
+              </Descriptions.Item>
+              <Descriptions.Item label="Lease Term">
+                <CalendarOutlined /> {office.leaseTerm || 'Not specified'}
+              </Descriptions.Item>
+              <Descriptions.Item label="Renovation">
+                {office.renovation || 'Not specified'}
+              </Descriptions.Item>
+              <Descriptions.Item label="Orientation">
+                {office.orientation || 'Not specified'}
+              </Descriptions.Item>
+            </Descriptions>
+          </ContentSection>
+        </MainColumn>
 
-        <TagContainer>
-          {office.tags?.map((tag, index) => (
-            <Tag key={index}>{tag}</Tag>
-          ))}
-        </TagContainer>
+        <StickyColumn>
+          <Space align="baseline" style={{ marginBottom: 16 }}>
+            <PriceText level={3}>¥{office.totalPrice?.toLocaleString() ?? 0}</PriceText>
+            <Text type="secondary">/月</Text>
+          </Space>
 
-        <Descriptions bordered column={2}>
-          <Descriptions.Item label="Building" span={2}>
-            <EnvironmentOutlined /> {building.name || 'Unknown Building'}
-          </Descriptions.Item>
-          <Descriptions.Item label="Area">
-            <HomeOutlined /> {office.area ?? 0} ㎡
-          </Descriptions.Item>
-          <Descriptions.Item label="Monthly Price">
-            <DollarOutlined /> ¥{office.totalPrice?.toLocaleString() ?? 0}/月
-          </Descriptions.Item>
-          <Descriptions.Item label="Capacity">
-            <TeamOutlined /> {office.capacity ?? 'N/A'} people
-          </Descriptions.Item>
-          <Descriptions.Item label="Lease Term">
-            <CalendarOutlined /> {office.leaseTerm || 'Not specified'}
-          </Descriptions.Item>
-          <Descriptions.Item label="Renovation" span={2}>
-            {office.renovation || 'Not specified'}
-          </Descriptions.Item>
-          <Descriptions.Item label="Orientation" span={2}>
-            {office.orientation || 'Not specified'}
-          </Descriptions.Item>
-          <Descriptions.Item label="Efficiency">
-            {office.efficiency ? `${(office.efficiency * 100).toFixed(0)}%` : 'N/A'}
-          </Descriptions.Item>
-          <Descriptions.Item label="Price per Unit">
-            ¥{office.pricePerUnit?.toLocaleString() ?? 0}/㎡
-          </Descriptions.Item>
-        </Descriptions>
+          <Descriptions column={1} size="small">
+            <Descriptions.Item label="Floor">
+              {office.floor ?? 'Unknown'} F
+            </Descriptions.Item>
+            <Descriptions.Item label="Price per Unit">
+              ¥{office.pricePerUnit?.toLocaleString() ?? 0}/㎡
+            </Descriptions.Item>
+            <Descriptions.Item label="Efficiency">
+              {office.efficiency ? `${(office.efficiency * 100).toFixed(0)}%` : 'N/A'}
+            </Descriptions.Item>
+          </Descriptions>
 
-        {office.status === 'available' && (
-          <Button 
-            type="primary" 
-            size="large" 
-            style={{ marginTop: 24 }}
-            onClick={handleBooking}
-          >
-            Book a Viewing
-          </Button>
-        )}
-      </ContentSection>
+          <TagContainer>
+            <Tag color={office.status === 'available' ? 'green' : 'orange'}>
+              {office.status || 'Unknown'}
+            </Tag>
+            {office.tags?.map((tag, index) => (
+              <Tag key={index}>{tag}</Tag>
+            ))}
+          </TagContainer>
+
+          {office.status === 'available' && (
+            <BookingButton 
+              type="primary"
+              onClick={handleBooking}
+            >
+              Book a Viewing
+            </BookingButton>
+          )}
+        </StickyColumn>
+      </PageLayout>
 
       <Modal
         title="Book a Viewing"

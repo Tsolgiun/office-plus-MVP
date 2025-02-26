@@ -4,6 +4,18 @@ import { AuthResponse, User, Building, Office, PaginatedResponse, ApiError } fro
 class ApiService {
   private api: AxiosInstance;
   private static instance: ApiService;
+  private readonly publicEndpoints = [
+    '/buildings/public',
+    '/buildings/public/',
+    '/offices/public',
+    '/buildings/public/search',
+    '/offices/public/',
+    '/offices/public/building/',
+  ];
+
+  private isPublicEndpoint(url: string): boolean {
+    return this.publicEndpoints.some(endpoint => url.startsWith(endpoint));
+  }
 
   private constructor() {
     this.api = axios.create({
@@ -67,7 +79,7 @@ class ApiService {
     return response.data;
   }
 
-  // Building endpoints
+  // Building endpoints - Owner access
   async createBuilding(buildingData: Partial<Building>): Promise<Building> {
     const response: AxiosResponse<{ building: Building }> = await this.api.post('/buildings', buildingData);
     return response.data.building;
@@ -97,7 +109,23 @@ class ApiService {
     return response.data;
   }
 
-  // Office endpoints
+  // Building endpoints - Public access
+  async getPublicBuildings(): Promise<Building[]> {
+    const response: AxiosResponse<Building[]> = await this.api.get('/buildings/public');
+    return response.data;
+  }
+
+  async getPublicBuildingById(id: string): Promise<Building> {
+    const response: AxiosResponse<Building> = await this.api.get(`/buildings/public/${id}`);
+    return response.data;
+  }
+
+  async searchPublicBuildings(params: Record<string, any>): Promise<PaginatedResponse<Building>> {
+    const response: AxiosResponse<PaginatedResponse<Building>> = await this.api.get('/buildings/public/search', { params });
+    return response.data;
+  }
+
+  // Office endpoints - Owner access
   async createOffice(officeData: Partial<Office>): Promise<Office> {
     const response: AxiosResponse<{ office: Office }> = await this.api.post('/offices', officeData);
     return response.data.office;
@@ -124,6 +152,22 @@ class ApiService {
 
   async searchOffices(params: Record<string, any>): Promise<PaginatedResponse<Office>> {
     const response: AxiosResponse<PaginatedResponse<Office>> = await this.api.get('/offices/search', { params });
+    return response.data;
+  }
+
+  // Office endpoints - Public access
+  async getPublicBuildingOffices(buildingId: string): Promise<Office[]> {
+    const response: AxiosResponse<Office[]> = await this.api.get(`/offices/public/building/${buildingId}`);
+    return response.data;
+  }
+
+  async getPublicOfficeById(id: string): Promise<Office> {
+    const response: AxiosResponse<Office> = await this.api.get(`/offices/public/${id}`);
+    return response.data;
+  }
+
+  async searchPublicOffices(params: Record<string, any>): Promise<PaginatedResponse<Office>> {
+    const response: AxiosResponse<PaginatedResponse<Office>> = await this.api.get('/offices/public/search', { params });
     return response.data;
   }
 

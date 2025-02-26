@@ -27,6 +27,9 @@ router.use(auth, isOwner);
 // Create new office
 router.post('/', handleUpload, createOffice);
 
+// Get building offices (owner access)
+router.get('/building/:buildingId', getBuildingOffices);
+
 // Search offices within a building
 router.get('/search', searchOffices);
 
