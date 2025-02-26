@@ -141,20 +141,20 @@ const Offices: React.FC = () => {
             <Title level={2}>Offices</Title>
             {building && (
               <Typography.Text type="secondary">
-                Building: {building.name}
+                写字楼: {building.name}
               </Typography.Text>
             )}
           </Space>
           <Space>
             <Button onClick={() => navigate('/buildings')}>
-              Back to Buildings
+              返回大楼
             </Button>
             <Button
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => navigate(`/buildings/${buildingId}/offices/new`)}
             >
-              Add Office
+              添加办公室
             </Button>
           </Space>
         </div>

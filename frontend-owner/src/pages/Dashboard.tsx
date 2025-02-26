@@ -89,7 +89,7 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
-              title="Total Buildings"
+              title="写字楼总数"
               value={buildings.length}
               prefix={<BuildOutlined />}
             />
@@ -98,7 +98,7 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
-              title="Total Offices"
+              title="办公室总数"
               value={totalOffices}
               prefix={<HomeOutlined />}
             />
@@ -107,7 +107,7 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
-              title="Available Offices"
+              title="可用的办公室"
               value={recentOffices.filter(office => office.status === 'available').length}
               prefix={<CheckCircleOutlined />}
               valueStyle={{ color: '#3f8600' }}
@@ -118,7 +118,7 @@ const Dashboard: React.FC = () => {
 
       <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
         <Col xs={24} lg={12}>
-          <Card title="Your Buildings" extra={<a onClick={() => navigate('/buildings')}>View All</a>}>
+          <Card title="你的写字楼" extra={<a onClick={() => navigate('/buildings')}>查看全部</a>}>
             <List
               dataSource={buildings}
               renderItem={building => (
@@ -144,7 +144,7 @@ const Dashboard: React.FC = () => {
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Recent Office Updates" extra={<ClockCircleOutlined />}>
+          <Card title="近期的办公室更新" extra={<ClockCircleOutlined />}>
             <List
               dataSource={recentOffices}
               renderItem={office => (
