@@ -368,6 +368,41 @@ const searchPublicOffices = async (req, res) => {
   }
 };
 
+// Get public office by ID
+const getPublicOfficeById = async (req, res) => {
+  try {
+    const office = await Office.findById(req.params.id);
+    
+    if (!office) {
+      return res.status(404).json({ message: 'Office not found' });
+    }
+
+    res.json(office);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error fetching office',
+      error: error.message
+    });
+  }
+};
+
+// Get all public offices in a building
+const getPublicBuildingOffices = async (req, res) => {
+  try {
+    const offices = await Office.find({ 
+      buildingId: req.params.buildingId,
+      status: 'available'  // Only show available offices
+    }).sort({ floor: 1, createdAt: -1 });
+    
+    res.json(offices);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error fetching offices',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   createOffice,
   getBuildingOffices,
@@ -377,5 +412,7 @@ module.exports = {
   searchOffices,
   searchPublicOffices,
   uploadImages,
-  deleteImage
+  deleteImage,
+  getPublicBuildingOffices,
+  getPublicOfficeById
 };

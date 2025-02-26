@@ -136,55 +136,57 @@ const OfficeDetail: React.FC = () => {
         </Button>
       </Space>
 
-      <StyledCarousel autoplay>
-        {office.photos.map((photo, index) => (
-          <div key={index}>
-            <img src={photo} alt={`Office View ${index + 1}`} />
-          </div>
-        ))}
-      </StyledCarousel>
+      {office.photos && office.photos.length > 0 && (
+        <StyledCarousel autoplay>
+          {office.photos.map((photo, index) => (
+            <div key={index}>
+              <img src={photo} alt={`Office View ${index + 1}`} />
+            </div>
+          ))}
+        </StyledCarousel>
+      )}
 
       <ContentSection>
         <Space align="center" style={{ marginBottom: 16 }}>
-          <Title level={2}>Floor {office.floor}</Title>
+          <Title level={2}>Floor {office.floor ?? 'Unknown'}</Title>
           <Tag color={office.status === 'available' ? 'green' : 'orange'}>
-            {office.status}
+            {office.status || 'Unknown'}
           </Tag>
         </Space>
 
         <TagContainer>
-          {office.tags.map((tag, index) => (
+          {office.tags?.map((tag, index) => (
             <Tag key={index}>{tag}</Tag>
           ))}
         </TagContainer>
 
         <Descriptions bordered column={2}>
           <Descriptions.Item label="Building" span={2}>
-            <EnvironmentOutlined /> {building.name}
+            <EnvironmentOutlined /> {building.name || 'Unknown Building'}
           </Descriptions.Item>
           <Descriptions.Item label="Area">
-            <HomeOutlined /> {office.area} ㎡
+            <HomeOutlined /> {office.area ?? 0} ㎡
           </Descriptions.Item>
           <Descriptions.Item label="Monthly Price">
-            <DollarOutlined /> ¥{office.totalPrice.toLocaleString()}/月
+            <DollarOutlined /> ¥{office.totalPrice?.toLocaleString() ?? 0}/月
           </Descriptions.Item>
           <Descriptions.Item label="Capacity">
-            <TeamOutlined /> {office.capacity} people
+            <TeamOutlined /> {office.capacity ?? 'N/A'} people
           </Descriptions.Item>
           <Descriptions.Item label="Lease Term">
-            <CalendarOutlined /> {office.leaseTerm}
+            <CalendarOutlined /> {office.leaseTerm || 'Not specified'}
           </Descriptions.Item>
           <Descriptions.Item label="Renovation" span={2}>
-            {office.renovation}
+            {office.renovation || 'Not specified'}
           </Descriptions.Item>
           <Descriptions.Item label="Orientation" span={2}>
-            {office.orientation}
+            {office.orientation || 'Not specified'}
           </Descriptions.Item>
           <Descriptions.Item label="Efficiency">
-            {(office.efficiency * 100).toFixed(0)}%
+            {office.efficiency ? `${(office.efficiency * 100).toFixed(0)}%` : 'N/A'}
           </Descriptions.Item>
           <Descriptions.Item label="Price per Unit">
-            ¥{office.pricePerUnit.toLocaleString()}/㎡
+            ¥{office.pricePerUnit?.toLocaleString() ?? 0}/㎡
           </Descriptions.Item>
         </Descriptions>
 

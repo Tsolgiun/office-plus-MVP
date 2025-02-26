@@ -9,6 +9,8 @@ class ApiService {
     '/buildings/',
     '/offices/public',
     '/buildings/search',
+    '/offices/public/',
+    '/offices/public/building/',
   ];
 
   private isPublicEndpoint(url: string): boolean {
@@ -100,12 +102,12 @@ class ApiService {
 
   // Office endpoints
   async getBuildingOffices(buildingId: string): Promise<Office[]> {
-    const response: AxiosResponse<Office[]> = await this.api.get(`/offices/building/${buildingId}`);
+    const response: AxiosResponse<Office[]> = await this.api.get(`/offices/public/building/${buildingId}`);
     return response.data;
   }
 
   async getOfficeById(id: string): Promise<Office> {
-    const response: AxiosResponse<Office> = await this.api.get(`/offices/${id}`);
+    const response: AxiosResponse<Office> = await this.api.get(`/offices/public/${id}`);
     return response.data;
   }
 

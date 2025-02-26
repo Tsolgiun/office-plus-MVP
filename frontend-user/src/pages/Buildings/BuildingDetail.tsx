@@ -96,35 +96,37 @@ const BuildingDetail: React.FC = () => {
         ← Back to Buildings
       </Button>
 
-      <StyledCarousel autoplay>
-        {building.photos.map((photo, index) => (
-          <div key={index}>
-            <img src={photo} alt={`${building.name} - ${index + 1}`} />
-          </div>
-        ))}
-      </StyledCarousel>
+      {building.photos && building.photos.length > 0 && (
+        <StyledCarousel autoplay>
+          {building.photos.map((photo, index) => (
+            <div key={index}>
+              <img src={photo} alt={`${building.name} - ${index + 1}`} />
+            </div>
+          ))}
+        </StyledCarousel>
+      )}
 
       <ContentSection>
         <Title level={2}>{building.name}</Title>
         <TagContainer>
-          <Tag color="blue">{building.grade}</Tag>
-          {building.tags.map((tag, index) => (
+          {building.grade && <Tag color="blue">{building.grade}</Tag>}
+          {building.tags?.map((tag, index) => (
             <Tag key={index}>{tag}</Tag>
           ))}
         </TagContainer>
 
         <Descriptions bordered column={2}>
           <Descriptions.Item label="Location" span={2}>
-            <EnvironmentOutlined /> {building.location.address} ({building.location.metro})
+            <EnvironmentOutlined /> {building.location?.address} {building.location?.metro && `(${building.location.metro})`}
           </Descriptions.Item>
           <Descriptions.Item label="Area Range">
-            <HomeOutlined /> {building.areaRange.min} - {building.areaRange.max} ㎡
+            <HomeOutlined /> {building.areaRange?.min ?? 0} - {building.areaRange?.max ?? 0} ㎡
           </Descriptions.Item>
           <Descriptions.Item label="Price Range">
-            <DollarOutlined /> ¥{building.priceRange.min.toLocaleString()} - ¥{building.priceRange.max.toLocaleString()}/月
+            <DollarOutlined /> ¥{building.priceRange?.min?.toLocaleString() ?? 0} - ¥{building.priceRange?.max?.toLocaleString() ?? 0}/月
           </Descriptions.Item>
           <Descriptions.Item label="Amenities" span={2}>
-            {building.amenities.join(', ')}
+            {building.amenities?.join(', ') || 'None'}
           </Descriptions.Item>
         </Descriptions>
       </ContentSection>
@@ -141,24 +143,26 @@ const BuildingDetail: React.FC = () => {
                   onClick={() => navigate(`/buildings/${building._id}/offices/${office._id}`)}
                   cover={
                     <img 
-                      alt={`Office ${office.floor}F`}
-                      src={office.photos[0] || '/placeholder-office.jpg'}
+                      alt={`Office ${office.floor ?? 'Unknown'}F`}
+                      src={office.photos?.[0] || '/placeholder-office.jpg'}
                       style={{ height: 200, objectFit: 'cover' }}
                     />
                   }
                 >
                   <Card.Meta
-                    title={`${office.floor}F - ${office.area}㎡`}
+                    title={`${office.floor ?? 'Unknown'}F - ${office.area ?? 0}㎡`}
                     description={
                       <>
-                        <Text>¥{office.totalPrice.toLocaleString()}/月</Text>
+                        <Text>¥{office.totalPrice?.toLocaleString() ?? 0}/月</Text>
                         <br />
-                        <Text type="secondary">{office.renovation} • {office.orientation}</Text>
+                        <Text type="secondary">
+                          {[office.renovation, office.orientation].filter(Boolean).join(' • ') || 'No details available'}
+                        </Text>
                         <TagContainer>
                           <Tag color={office.status === 'available' ? 'green' : 'orange'}>
-                            {office.status}
+                            {office.status || 'Unknown'}
                           </Tag>
-                          {office.tags.slice(0, 2).map((tag, index) => (
+                          {office.tags?.slice(0, 2).map((tag, index) => (
                             <Tag key={index}>{tag}</Tag>
                           ))}
                         </TagContainer>

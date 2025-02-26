@@ -11,20 +11,21 @@ const {
   searchOffices,
   searchPublicOffices,
   uploadImages,
-  deleteImage
+  deleteImage,
+  getPublicBuildingOffices,
+  getPublicOfficeById
 } = require('../controllers/office.controller');
 
-// Public routes
+// Public routes - most specific routes first
 router.get('/public/search', searchPublicOffices);
+router.get('/public/building/:buildingId', getPublicBuildingOffices);  // Use new public controller
+router.get('/public/:id', getPublicOfficeById);                // Generic ID route last, using public controller
 
 // Protected routes - require authentication and owner role
 router.use(auth, isOwner);
 
 // Create new office
 router.post('/', handleUpload, createOffice);
-
-// Get all offices in a building
-router.get('/building/:buildingId', getBuildingOffices);
 
 // Search offices within a building
 router.get('/search', searchOffices);
