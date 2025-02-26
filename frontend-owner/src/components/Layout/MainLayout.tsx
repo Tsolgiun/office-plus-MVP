@@ -50,7 +50,6 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [openKeys, setOpenKeys] = useState<string[]>(['offices']);
   const { token: { colorBgContainer } } = theme.useToken();
   const location = useLocation();
   const navigate = useNavigate();
@@ -71,17 +70,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     {
       key: 'offices',
       icon: <AppstoreOutlined />,
-      label: '办公室',
-      children: [
-        {
-          key: 'offices',
-          label: <Link to="/offices">所有的办公室</Link>,
-        },
-        {
-          key: 'offices-by-building',
-          label: <Link to="/buildings">通过写字楼</Link>,
-        }
-      ]
+      label: <Link to="/offices">所有的办公室</Link>,
     },
   ];
 
@@ -103,10 +92,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     },
   ];
 
-  const onOpenChange = (keys: string[]) => {
-    setOpenKeys(keys);
-  };
-
   return (
     <StyledLayout>
       <Sider trigger={null} collapsible collapsed={collapsed}>
@@ -117,8 +102,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname.split('/')[1] || 'dashboard']}
-          openKeys={openKeys}
-          onOpenChange={onOpenChange}
           items={menuItems}
         />
       </Sider>
