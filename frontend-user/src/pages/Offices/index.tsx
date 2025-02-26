@@ -9,12 +9,37 @@ const { Title } = Typography;
 const { Option } = Select;
 const { Meta } = Card;
 
-const FiltersContainer = styled.div`
-  margin-bottom: 24px;
-  padding: 24px;
+const PageLayout = styled.div`
+  display: flex;
+  gap: 24px;
+  min-height: calc(100vh - 64px); /* Adjust based on your header height */
+`;
+
+const Sidebar = styled.div`
+  width: 280px;
+  flex-shrink: 0;
   background: white;
+  padding: 24px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  height: fit-content;
+  position: sticky;
+  top: 24px;
+`;
+
+const MainContent = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+`;
+
+const StyledTitle = styled(Title)`
+  margin-bottom: 16px !important;
+`;
+
+const StyledSelect = styled(Select<string>)`
+  width: 100% !important;
+  margin-top: 16px;
 `;
 
 const StyledCard = styled(Card)`
@@ -115,56 +140,53 @@ const Offices: React.FC = () => {
   }
 
   return (
-    <div>
-      <Title level={2}>Available Offices</Title>
-      
-      <FiltersContainer>
-        <Space size="large" style={{ width: '100%' }}>
-          <Input
-            placeholder="Search offices..."
-            prefix={<SearchOutlined />}
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            style={{ width: 300 }}
-          />
-          <Select
-            value={sortBy}
-            onChange={setSortBy}
-            style={{ width: 200 }}
-          >
-            <Option value="price-asc">Price: Low to High</Option>
-            <Option value="price-desc">Price: High to Low</Option>
-            <Option value="area-asc">Area: Small to Large</Option>
-            <Option value="area-desc">Area: Large to Small</Option>
-          </Select>
-        </Space>
-      </FiltersContainer>
+    <PageLayout>
+      <Sidebar>
+        <StyledTitle level={4}>Filters</StyledTitle>
+        <Input
+          placeholder="Search offices..."
+          prefix={<SearchOutlined />}
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
+        <StyledSelect<string>
+          value={sortBy}
+          onChange={setSortBy}
+        >
+          <Option value="price-asc">Price: Low to High</Option>
+          <Option value="price-desc">Price: High to Low</Option>
+          <Option value="area-asc">Area: Small to Large</Option>
+          <Option value="area-desc">Area: Large to Small</Option>
+        </StyledSelect>
+      </Sidebar>
 
-      {sortedAndFilteredOffices.length === 0 ? (
-        <Empty description="No offices found" />
-      ) : (
-        <>
-          <Row gutter={[24, 24]}>
-            {sortedAndFilteredOffices.map(office => (
-              <Col xs={24} sm={12} lg={8} key={office._id}>
-                <OfficeCard office={office} />
-              </Col>
-            ))}
-          </Row>
-          {hasMore && (
-            <div style={{ textAlign: 'center', marginTop: '24px' }}>
-              <Button 
-                type="primary"
-                onClick={() => setCurrentPage(prev => prev + 1)}
-                loading={loading}
-              >
-                Load More
-              </Button>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+      <MainContent>
+        {sortedAndFilteredOffices.length === 0 ? (
+          <Empty description="No offices found" />
+        ) : (
+          <>
+            <Row gutter={[24, 24]} justify="center">
+              {sortedAndFilteredOffices.map(office => (
+                <Col xs={24} sm={12} lg={8} xl={8} key={office._id}>
+                  <OfficeCard office={office} />
+                </Col>
+              ))}
+            </Row>
+            {hasMore && (
+              <div style={{ textAlign: 'center', marginTop: '24px' }}>
+                <Button 
+                  type="primary"
+                  onClick={() => setCurrentPage(prev => prev + 1)}
+                  loading={loading}
+                >
+                  Load More
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </MainContent>
+    </PageLayout>
   );
 };
 
