@@ -21,6 +21,8 @@ const Dashboard: React.FC = () => {
   const [recentOffices, setRecentOffices] = useState<Office[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [totalOfficeCount, setTotalOfficeCount] = useState(0);
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -33,6 +35,9 @@ const Dashboard: React.FC = () => {
         );
         const officesArrays = await Promise.all(officesPromises);
         const allOffices = officesArrays.flat();
+
+        // Set total office count
+        setTotalOfficeCount(allOffices.length);
 
         // Sort offices by last updated date and take the 5 most recent
         const sortedOffices = allOffices.sort((a, b) => 
@@ -49,14 +54,6 @@ const Dashboard: React.FC = () => {
 
     fetchDashboardData();
   }, []);
-
-  const totalOffices = buildings.reduce((sum, building) => {
-    const min = building.areaRange.min;
-    const max = building.areaRange.max;
-    // Estimate number of offices based on area range
-    const estimatedOffices = Math.ceil((max - min) / 100); // Assuming average office size of 100
-    return sum + estimatedOffices;
-  }, 0);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -99,7 +96,7 @@ const Dashboard: React.FC = () => {
           <Card>
             <Statistic
               title="办公室总数"
-              value={totalOffices}
+              value={totalOfficeCount}
               prefix={<HomeOutlined />}
             />
           </Card>
