@@ -1,6 +1,88 @@
 const Building = require('../models/building.model');
 const cloudinary = require('../config/cloudinary');
 
+// Public endpoints
+const getPublicBuildings = async (req, res) => {
+  try {
+    const buildings = await Building.find({})
+      .select('name description location priceRange areaRange photos')
+      .sort({ createdAt: -1 });
+    res.json(buildings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getPublicBuildingById = async (req, res) => {
+  try {
+    const building = await Building.findById(req.params.id)
+      .select('name description location priceRange areaRange photos');
+    
+    if (!building) {
+      return res.status(404).json({ message: 'Building not found' });
+    }
+
+    res.json(building);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const searchPublicBuildings = async (req, res) => {
+  try {
+    const {
+      metroDistance,
+      priceRange,
+      areaRange,
+      tags,
+      page = 1,
+      limit = 10
+    } = req.query;
+
+    const query = {};
+
+    if (metroDistance) {
+      query['location.metro'] = metroDistance;
+    }
+
+    if (priceRange) {
+      const [min, max] = priceRange.split(',').map(Number);
+      query['priceRange.min'] = { $gte: min };
+      query['priceRange.max'] = { $lte: max };
+    }
+
+    if (areaRange) {
+      const [min, max] = areaRange.split(',').map(Number);
+      query['areaRange.min'] = { $gte: min };
+      query['areaRange.max'] = { $lte: max };
+    }
+
+    if (tags) {
+      query.tags = { $all: tags.split(',') };
+    }
+
+    const buildings = await Building.find(query)
+      .select('name description location priceRange areaRange photos')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const total = await Building.countDocuments(query);
+
+    res.json({
+      buildings,
+      total,
+      pages: Math.ceil(total / limit),
+      currentPage: page
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error searching buildings',
+      error: error.message
+    });
+  }
+};
+
 // Create new building
 const createBuilding = async (req, res) => {
   // Get Cloudinary URLs from multer middleware
@@ -42,7 +124,7 @@ const getOwnerBuildings = async (req, res) => {
   }
 };
 
-// Get single building by ID
+// Get single building by ID (for owner)
 const getBuildingById = async (req, res) => {
   try {
     const building = await Building.findOne({
@@ -63,7 +145,6 @@ const getBuildingById = async (req, res) => {
   }
 };
 
-// Update building
 // Upload images for existing building
 const uploadImages = async (req, res) => {
   try {
@@ -135,6 +216,7 @@ const deleteImage = async (req, res) => {
   }
 };
 
+// Update building
 const updateBuilding = async (req, res) => {
   try {
     const building = await Building.findOne({
@@ -188,7 +270,7 @@ const deleteBuilding = async (req, res) => {
   }
 };
 
-// Search buildings
+// Search owner's buildings
 const searchBuildings = async (req, res) => {
   try {
     const {
@@ -251,5 +333,9 @@ module.exports = {
   deleteBuilding,
   searchBuildings,
   uploadImages,
-  deleteImage
+  deleteImage,
+  // Public endpoints
+  getPublicBuildings,
+  getPublicBuildingById,
+  searchPublicBuildings
 };

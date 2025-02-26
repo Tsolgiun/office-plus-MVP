@@ -4,6 +4,16 @@ import { Building, Office, User, AuthResponse, ApiError, PaginatedResponse } fro
 class ApiService {
   private api: AxiosInstance;
   private static instance: ApiService;
+  private readonly publicEndpoints = [
+    '/buildings',
+    '/buildings/',
+    '/offices/public',
+    '/buildings/search',
+  ];
+
+  private isPublicEndpoint(url: string): boolean {
+    return this.publicEndpoints.some(endpoint => url.startsWith(endpoint));
+  }
 
   private constructor() {
     this.api = axios.create({
@@ -13,8 +23,13 @@ class ApiService {
       },
     });
 
-    // Add token to requests if available
+    // Add token to requests if available and endpoint requires auth
     this.api.interceptors.request.use((config) => {
+      // Skip auth for public endpoints
+      if (config.url && this.isPublicEndpoint(config.url)) {
+        return config;
+      }
+      
       const token = localStorage.getItem('token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -26,7 +41,8 @@ class ApiService {
     this.api.interceptors.response.use(
       (response) => response,
       (error: AxiosError<ApiError>) => {
-        if (error.response?.status === 401) {
+        // Only redirect to login for auth-required endpoints
+        if (error.response?.status === 401 && error.config?.url && !this.isPublicEndpoint(error.config.url)) {
           localStorage.removeItem('token');
           window.location.href = '/login';
         }
@@ -68,17 +84,17 @@ class ApiService {
 
   // Building endpoints
   async getBuildings(params?: Record<string, unknown>): Promise<Building[]> {
-    const response: AxiosResponse<Building[]> = await this.api.get('/buildings', { params });
+    const response: AxiosResponse<Building[]> = await this.api.get('/buildings/public', { params });
     return response.data;
   }
 
   async getBuildingById(id: string): Promise<Building> {
-    const response: AxiosResponse<Building> = await this.api.get(`/buildings/${id}`);
+    const response: AxiosResponse<Building> = await this.api.get(`/buildings/public/${id}`);
     return response.data;
   }
 
   async searchBuildings(params: Record<string, unknown>): Promise<PaginatedResponse<Building>> {
-    const response: AxiosResponse<PaginatedResponse<Building>> = await this.api.get('/buildings/search', { params });
+    const response: AxiosResponse<PaginatedResponse<Building>> = await this.api.get('/buildings/public/search', { params });
     return response.data;
   }
 

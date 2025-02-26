@@ -10,22 +10,30 @@ const {
   deleteBuilding,
   searchBuildings,
   uploadImages,
-  deleteImage
+  deleteImage,
+  getPublicBuildings,
+  getPublicBuildingById,
+  searchPublicBuildings
 } = require('../controllers/building.controller');
 
-// All routes require authentication and owner role
+// Public routes (must be defined before auth middleware)
+router.get('/public', getPublicBuildings);
+router.get('/public/search', searchPublicBuildings);
+router.get('/public/:id', getPublicBuildingById);
+
+// Protected routes require authentication and owner role
 router.use(auth, isOwner);
 
 // Create new building
 router.post('/', handleUpload, createBuilding);
 
-// Get all buildings for owner
+// Get buildings for owner
 router.get('/', getOwnerBuildings);
 
-// Search buildings
+// Search owner's buildings
 router.get('/search', searchBuildings);
 
-// Get single building
+// Get single building (owner access)
 router.get('/:id', getBuildingById);
 
 // Update building
