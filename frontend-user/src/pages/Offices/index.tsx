@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Row, Col, Typography, Input, Select, Space, Empty, Spin, Card, Button } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
@@ -105,9 +106,12 @@ const Offices: React.FC = () => {
       }
     });
 
+  const navigate = useNavigate();
+
   const OfficeCard: React.FC<{ office: Office }> = ({ office }) => (
     <StyledCard
       hoverable
+      onClick={() => navigate(`/offices/${office._id}`)}
       cover={
         <img
           alt={`Office on floor ${office.floor}`}

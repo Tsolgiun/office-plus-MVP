@@ -60,7 +60,7 @@ const TagContainer = styled.div`
 `;
 
 const OfficeDetail: React.FC = () => {
-  const { buildingId, officeId } = useParams<{ buildingId: string; officeId: string }>();
+  const { buildingId, officeId, id } = useParams<{ buildingId?: string; officeId?: string; id?: string }>();
   const navigate = useNavigate();
   const [office, setOffice] = useState<Office | null>(null);
   const [building, setBuilding] = useState<Building | null>(null);
@@ -71,15 +71,18 @@ const OfficeDetail: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!buildingId || !officeId) return;
-      
       try {
-        const [buildingData, officeData] = await Promise.all([
-          api.getBuildingById(buildingId),
-          api.getOfficeById(officeId)
-        ]);
-        setBuilding(buildingData);
+        // Get the office data first
+        const targetOfficeId = officeId || id;
+        if (!targetOfficeId) return;
+        
+        const officeData = await api.getOfficeById(targetOfficeId);
         setOffice(officeData);
+
+        // Then get the building data using buildingId from either URL or office data
+        const targetBuildingId = buildingId || officeData.buildingId;
+        const buildingData = await api.getBuildingById(targetBuildingId);
+        setBuilding(buildingData);
       } catch (error) {
         console.error('Error fetching office data:', error);
       } finally {
@@ -88,7 +91,7 @@ const OfficeDetail: React.FC = () => {
     };
 
     fetchData();
-  }, [buildingId, officeId]);
+  }, [buildingId, officeId, id]);
 
   const handleBooking = () => {
     if (!isLoggedIn) {
@@ -131,7 +134,7 @@ const OfficeDetail: React.FC = () => {
         <Button type="link" onClick={() => navigate('/buildings')}>
           ← Back to Buildings
         </Button>
-        <Button type="link" onClick={() => navigate(`/buildings/${buildingId}`)}>
+        <Button type="link" onClick={() => navigate(`/buildings/${office.buildingId}`)}>
           ← Back to Building
         </Button>
       </Space>
