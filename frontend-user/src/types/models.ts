@@ -2,7 +2,19 @@ export interface User {
   _id: string;
   username: string;
   email: string;
-  role: 'tenant' | 'owner' | 'admin';
+  role: 'tenant' | 'owner' | 'admin' | 'user';
+  favoriteBuildings: string[];
+  favoriteOffices: string[];
+}
+
+export interface FavoriteResponse {
+  favorited: boolean;
+  favorites: string[];
+}
+
+export interface UserFavorites {
+  buildings: Building[];
+  offices: Office[];
 }
 
 export interface Building {

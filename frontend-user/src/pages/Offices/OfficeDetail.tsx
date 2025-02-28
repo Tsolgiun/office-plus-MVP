@@ -14,6 +14,8 @@ import {
   Input,
   DatePicker,
   message,
+  Row,
+  Col,
 } from 'antd';
 import { 
   EnvironmentOutlined, 
@@ -21,8 +23,9 @@ import {
   TeamOutlined,
   CalendarOutlined,
   LeftOutlined,
-  RightOutlined
+  RightOutlined,
 } from '@ant-design/icons';
+import FavoriteButton from '../../components/FavoriteButton';
 import styled from 'styled-components';
 import { Building, Office } from '../../types/models';
 import { api } from '../../services/api';
@@ -69,7 +72,7 @@ const ImageContainer = styled.div`
   }
 
   &:hover {
-    .nav-buttons {
+    .nav-buttons, .favorite-button {
       opacity: 1;
     }
   }
@@ -104,6 +107,14 @@ const NavButton = styled(Button)`
   &.next {
     right: 20px;
   }
+`;
+
+const FavoriteButtonWrapper = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  opacity: 1;
 `;
 
 const PhotoCounter = styled.div`
@@ -142,6 +153,10 @@ const BookingButton = styled(Button)`
   height: 48px;
   font-size: 16px;
   margin-top: 16px;
+`;
+
+const PriceHeader = styled.div`
+  margin-bottom: 16px;
 `;
 
 const OfficeDetail: React.FC = () => {
@@ -231,14 +246,16 @@ const OfficeDetail: React.FC = () => {
 
   return (
     <div>
-      <Space style={{ marginBottom: 16, padding: '0 24px' }}>
-        <Button type="link" onClick={() => navigate('/buildings')}>
-          ← Back to Buildings
-        </Button>
-        <Button type="link" onClick={() => navigate(`/buildings/${office.buildingId}`)}>
-          ← Back to Building
-        </Button>
-      </Space>
+      <Row align="middle" style={{ padding: '0 24px', marginBottom: 16 }}>
+        <Col>
+          <Button type="link" onClick={() => navigate('/buildings')}>
+            ← Back to Buildings
+          </Button>
+          <Button type="link" onClick={() => navigate(`/buildings/${office.buildingId}`)}>
+            ← Back to Building
+          </Button>
+        </Col>
+      </Row>
 
       <PageLayout>
         <MainColumn>
@@ -248,6 +265,9 @@ const OfficeDetail: React.FC = () => {
                 src={office.photos[currentPhotoIndex]} 
                 alt={`Office View ${currentPhotoIndex + 1}`} 
               />
+              <FavoriteButtonWrapper className="favorite-button">
+                <FavoriteButton itemId={office._id} type="office" />
+              </FavoriteButtonWrapper>
               <div className="nav-buttons">
                 <NavButton 
                   className="prev" 
@@ -292,10 +312,12 @@ const OfficeDetail: React.FC = () => {
         </MainColumn>
 
         <StickyColumn>
-          <Space align="baseline" style={{ marginBottom: 16 }}>
-            <PriceText level={3}>¥{office.totalPrice?.toLocaleString() ?? 0}</PriceText>
-            <Text type="secondary">/月</Text>
-          </Space>
+          <PriceHeader>
+            <Space align="baseline">
+              <PriceText level={3}>¥{office.totalPrice?.toLocaleString() ?? 0}</PriceText>
+              <Text type="secondary">/月</Text>
+            </Space>
+          </PriceHeader>
 
           <Descriptions column={1} size="small">
             <Descriptions.Item label="Floor">

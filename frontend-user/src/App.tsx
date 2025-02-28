@@ -7,6 +7,7 @@ import Buildings from './pages/Buildings';
 import Offices from './pages/Offices';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
+import Favorites from './pages/Favorites';
 import BuildingDetail from './pages/Buildings/BuildingDetail';
 import OfficeDetail from './pages/Offices/OfficeDetail';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -56,7 +57,7 @@ const App: React.FC = () => {
                 <Route path="/offices/:id" element={<OfficeDetail />} />
                 
                 {/* Protected Routes */}
-                <Route path="/favorites" element={<ProtectedRoute><div>Favorites</div></ProtectedRoute>} />
+                <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
                 <Route path="/appointments" element={<ProtectedRoute><div>Appointments</div></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><div>Profile</div></ProtectedRoute>} />
               </Routes>

@@ -5,6 +5,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { Office } from '../../types/models';
 import { api } from '../../services/api';
+import FavoriteButton from '../../components/FavoriteButton';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -45,15 +46,26 @@ const StyledSelect = styled(Select<string>)`
 
 const StyledCard = styled(Card)`
   height: 100%;
+
   .ant-card-cover {
     height: 200px;
     overflow: hidden;
+    position: relative;
+    
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
   }
+`;
+
+const FavoriteButtonWrapper = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  opacity: 1;
 `;
 
 const Offices: React.FC = () => {
@@ -113,10 +125,15 @@ const Offices: React.FC = () => {
       hoverable
       onClick={() => navigate(`/offices/${office._id}`)}
       cover={
-        <img
-          alt={`Office on floor ${office.floor}`}
-          src={office.photos[0] || 'https://via.placeholder.com/300x200?text=No+Image'}
-        />
+        <div style={{ position: 'relative' }}>
+          <img
+            alt={`Office on floor ${office.floor}`}
+            src={office.photos[0] || 'https://via.placeholder.com/300x200?text=No+Image'}
+          />
+          <FavoriteButtonWrapper onClick={e => e.stopPropagation()}>
+            <FavoriteButton itemId={office._id} type="office" />
+          </FavoriteButtonWrapper>
+        </div>
       }
     >
       <Meta

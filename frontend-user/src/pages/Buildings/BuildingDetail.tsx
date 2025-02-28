@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Typography, Spin, Descriptions, Tag, Row, Col, Card, Empty, Button, Space } from 'antd';
 import { EnvironmentOutlined, HomeOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
+import FavoriteButton from '../../components/FavoriteButton';
 import styled from 'styled-components';
 import { Building, Office } from '../../types/models';
 import { api } from '../../services/api';
@@ -46,7 +47,7 @@ const ImageContainer = styled.div`
   }
 
   &:hover {
-    .nav-buttons {
+    .nav-buttons, .favorite-button {
       opacity: 1;
     }
   }
@@ -67,12 +68,7 @@ const NavButton = styled(Button)`
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
-  opacity: 0;
-
-  &:hover {
-    background: rgba(255, 255, 255, 1) !important;
-    transform: translateY(-50%) scale(1.1);
-  }
+  opacity: 1;
 
   &.prev {
     left: 20px;
@@ -81,6 +77,14 @@ const NavButton = styled(Button)`
   &.next {
     right: 20px;
   }
+`;
+
+const FavoriteButtonWrapper = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  opacity: 1;
 `;
 
 const PhotoCounter = styled.div`
@@ -117,6 +121,23 @@ const OfficeCard = styled(Card)`
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .ant-card-cover {
+    position: relative;
+  }
+`;
+
+const OfficeCardFavoriteWrapper = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s;
+
+  ${OfficeCard}:hover & {
+    opacity: 1;
   }
 `;
 
@@ -199,6 +220,9 @@ const BuildingDetail: React.FC = () => {
                 src={building.photos[currentPhotoIndex]} 
                 alt={`${building.name} - ${currentPhotoIndex + 1}`} 
               />
+              <FavoriteButtonWrapper className="favorite-button">
+                <FavoriteButton itemId={building._id} type="building" />
+              </FavoriteButtonWrapper>
               <div className="nav-buttons">
                 <NavButton 
                   className="prev" 
@@ -243,11 +267,16 @@ const BuildingDetail: React.FC = () => {
                     <OfficeCard
                       onClick={() => navigate(`/buildings/${building._id}/offices/${office._id}`)}
                       cover={
-                        <img 
-                          alt={`Office ${office.floor ?? 'Unknown'}F`}
-                          src={office.photos?.[0] || '/placeholder-office.jpg'}
-                          style={{ height: 200, objectFit: 'cover' }}
-                        />
+                        <div style={{ position: 'relative' }}>
+                          <img 
+                            alt={`Office ${office.floor ?? 'Unknown'}F`}
+                            src={office.photos?.[0] || '/placeholder-office.jpg'}
+                            style={{ height: 200, objectFit: 'cover' }}
+                          />
+                          <OfficeCardFavoriteWrapper onClick={e => e.stopPropagation()}>
+                            <FavoriteButton itemId={office._id} type="office" />
+                          </OfficeCardFavoriteWrapper>
+                        </div>
                       }
                     >
                       <Card.Meta

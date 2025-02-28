@@ -9,6 +9,7 @@ const morgan = require('morgan');
 const authRoutes = require('./routes/auth.routes');
 const buildingRoutes = require('./routes/building.routes');
 const officeRoutes = require('./routes/office.routes');
+const favoriteRoutes = require('./routes/favorite.routes');
 
 // Load environment variables
 dotenv.config();
@@ -42,6 +43,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/buildings', buildingRoutes);
 app.use('/api/offices', officeRoutes);
+app.use('/api/favorites', favoriteRoutes);
 
 // 404 handler
 app.use((req, res) => {

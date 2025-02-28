@@ -1,5 +1,14 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
-import { Building, Office, User, AuthResponse, ApiError, PaginatedResponse } from '../types/models';
+import { 
+  Building, 
+  Office, 
+  User, 
+  AuthResponse, 
+  ApiError, 
+  PaginatedResponse,
+  UserFavorites,
+  FavoriteResponse 
+} from '../types/models';
 
 class ApiService {
   private api: AxiosInstance;
@@ -120,6 +129,22 @@ class ApiService {
   // User endpoints
   async getUserProfile(): Promise<User> {
     const response: AxiosResponse<User> = await this.api.get('/auth/profile');
+    return response.data;
+  }
+
+  // Favorite endpoints
+  async getFavorites(): Promise<UserFavorites> {
+    const response: AxiosResponse<UserFavorites> = await this.api.get('/favorites');
+    return response.data;
+  }
+
+  async toggleBuildingFavorite(buildingId: string): Promise<FavoriteResponse> {
+    const response: AxiosResponse<FavoriteResponse> = await this.api.post(`/favorites/buildings/${buildingId}`);
+    return response.data;
+  }
+
+  async toggleOfficeFavorite(officeId: string): Promise<FavoriteResponse> {
+    const response: AxiosResponse<FavoriteResponse> = await this.api.post(`/favorites/offices/${officeId}`);
     return response.data;
   }
 }
