@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Typography, Spin, Descriptions, Tag, Row, Col, Card, Empty, Button, Space } from 'antd';
-import { EnvironmentOutlined, HomeOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { EnvironmentOutlined, HomeOutlined, LeftOutlined, RightOutlined, CalendarOutlined } from '@ant-design/icons';
 import FavoriteButton from '../../components/FavoriteButton';
 import styled from 'styled-components';
 import { Building, Office } from '../../types/models';
@@ -332,6 +332,14 @@ const BuildingDetail: React.FC = () => {
               {building.location?.metro || 'Not specified'}
             </Descriptions.Item>
           </Descriptions>
+
+          <Button 
+            type="primary" 
+            icon={<CalendarOutlined />}
+            onClick={() => navigate(`/buildings/${id}/appointment`)}
+          >
+            预约参观
+          </Button>
         </StickyColumn>
       </PageLayout>
     </div>

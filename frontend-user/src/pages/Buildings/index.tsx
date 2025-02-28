@@ -104,9 +104,9 @@ const Buildings: React.FC = () => {
   return (
     <PageLayout>
       <Sidebar>
-        <StyledTitle level={4}>Filters</StyledTitle>
+        <StyledTitle level={4}>筛选</StyledTitle>
         <Input
-          placeholder="Search buildings..."
+          placeholder="查找写字楼"
           prefix={<SearchOutlined />}
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
@@ -115,24 +115,24 @@ const Buildings: React.FC = () => {
           value={sortBy}
           onChange={setSortBy}
         >
-          <Option value="name">Name A-Z</Option>
-          <Option value="price-asc">Price: Low to High</Option>
-          <Option value="price-desc">Price: High to Low</Option>
-          <Option value="area-asc">Area: Small to Large</Option>
-          <Option value="area-desc">Area: Large to Small</Option>
+          <Option value="name">名字: A-Z排序</Option>
+          <Option value="price-asc">价格: 从低到高</Option>
+          <Option value="price-desc">价格: 从高到低</Option>
+          <Option value="area-asc">面积: 从小到大</Option>
+          <Option value="area-desc">面积: 从大到小</Option>
         </StyledSelect>
       </Sidebar>
 
       <MainContent>
         <WelcomeSection>
-          <StyledTitle>Find Your Perfect Office Space</StyledTitle>
+          <StyledTitle>找到最适合你的办公场所</StyledTitle>
           <Typography.Text>
-            Explore our collection of premium office buildings in prime locations
+            探索我们优质的办公楼宇，找到最适合你的办公场所
           </Typography.Text>
         </WelcomeSection>
 
         {sortedAndFilteredBuildings.length === 0 ? (
-          <Empty description="No buildings found" />
+          <Empty description="没有找到合适的写字楼" />
         ) : (
           <Row gutter={[24, 24]} justify="center">
             {sortedAndFilteredBuildings.map(building => (

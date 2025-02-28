@@ -7,7 +7,8 @@ import {
   ApiError, 
   PaginatedResponse,
   UserFavorites,
-  FavoriteResponse 
+  FavoriteResponse,
+  Appointment
 } from '../types/models';
 
 class ApiService {
@@ -145,6 +146,42 @@ class ApiService {
 
   async toggleOfficeFavorite(officeId: string): Promise<FavoriteResponse> {
     const response: AxiosResponse<FavoriteResponse> = await this.api.post(`/favorites/offices/${officeId}`);
+    return response.data;
+  }
+
+  // Appointments endpoints
+  async createAppointment(appointmentData: Omit<Appointment, '_id' | 'status'>): Promise<any> {
+    const response = await this.api.put('/appointments/createAppointment', appointmentData);
+    return response.data;
+  }
+
+  async getUserAppointments(userId: string): Promise<any> {
+    const response = await this.api.get(`/appointments/getUserAppointments/${userId}`);
+    return response.data;
+  }
+
+  async cancelAppointment(appointmentId: string): Promise<any> {
+    const response = await this.api.post(`/appointments/cancelAppointment/${appointmentId}`);
+    return response.data;
+  }
+
+  async getBuildingAppointments(buildingId: string, date?: string): Promise<any> {
+    const url = date 
+      ? `/appointments/getBuildingAppointments/${buildingId}?date=${date}`
+      : `/appointments/getBuildingAppointments/${buildingId}`;
+      
+    const response = await this.api.get(url);
+    return response.data;
+  }
+
+  async updateAppointmentStatus(appointmentId: string, status: string): Promise<any> {
+    const response = await this.api.post(`/appointments/updateAppointmentStatus/${appointmentId}`, { status });
+    return response.data;
+  }
+
+  //Ai endpoints
+  async getAIresponse(message: string): Promise<any> {
+    const response = await this.api.get(`/auth/getAIresponse`, { params: { message } });
     return response.data;
   }
 }

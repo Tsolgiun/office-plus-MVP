@@ -57,6 +57,25 @@ export interface Office {
   lastUpdated: Date;
 }
 
+export interface Favorites {
+  _id: string,
+  userId: string,
+  buildingId: string
+}
+
+export interface Appointment {
+  _id: string;
+  userId: string;
+  building: string;
+  room?: string;
+  startTime: Date;
+  endTime: Date;
+  purpose: string;
+  attendees: number;
+  status: string;
+  contactInfo: string;
+}
+
 export interface AuthResponse {
   token: string;
   user: User;
