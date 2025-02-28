@@ -178,6 +178,12 @@ class ApiService {
     const response = await this.api.post(`/appointments/updateAppointmentStatus/${appointmentId}`, { status });
     return response.data;
   }
+
+  //Ai endpoints
+  async getAIresponse(message: string): Promise<any> {
+    const response = await this.api.get(`/auth/getAIresponse`, { params: { message } });
+    return response.data;
+  }
 }
 
 export const api = ApiService.getInstance();

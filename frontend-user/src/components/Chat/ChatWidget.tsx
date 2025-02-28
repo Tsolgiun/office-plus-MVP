@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styled from 'styled-components';
+import {api} from '../../services/api';
 
 const ChatContainer = styled.div`
   position: fixed;
@@ -112,49 +113,42 @@ interface ChatMessage {
 export const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { text: "Hello! How can I help you today?", isUser: false }
+    { text: "您好！ 我今天可以帮助你什么？", isUser: false }
   ]);
   const [inputText, setInputText] = useState("");
 
-  const getBotResponse = (userMessage: string): string => {
-    const lowerMessage = userMessage.toLowerCase();
-    
-    if (lowerMessage.includes('price') || lowerMessage.includes('cost')) {
-      return "Our office prices vary depending on size and location. You can find detailed pricing information on each office's page. Would you like me to help you find a specific office?";
+  const getBotResponse = async (userMessage: string): Promise<string> => {
+    try {
+      const response = await api.getAIresponse(userMessage);
+      console.log(response);
+      return response.response || "我不是很清楚你的问题，你可以重复一下吗？";
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+      return "不好意思，服务器正忙，您可以之后再来尝试吗？";
     }
-    if (lowerMessage.includes('book') || lowerMessage.includes('reserve')) {
-      return "To book an office, you'll need to create an account and submit a booking request. Would you like me to guide you through the process?";
-    }
-    if (lowerMessage.includes('amenities') || lowerMessage.includes('facilities')) {
-      return "Our offices come with various amenities including high-speed internet, meeting rooms, kitchen facilities, and 24/7 access. The specific amenities vary by location.";
-    }
-    if (lowerMessage.includes('contact') || lowerMessage.includes('support')) {
-      return "You can reach our support team at support@officeplus.com or call us at +1-234-567-8900 during business hours.";
-    }
-    if (lowerMessage.includes('available') || lowerMessage.includes('vacancy')) {
-      return "Office availability is updated in real-time on our platform. You can check current availability by browsing our listings. Would you like help finding available offices?";
-    }
-    
-    return "I'm not sure about that. Could you please rephrase your question or ask about office availability, pricing, booking process, amenities, or contact information?";
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
+    const userMessage = inputText;
     const newMessages = [
       ...messages,
-      { text: inputText, isUser: true }
+      { text: userMessage, isUser: true }
     ];
     setMessages(newMessages);
     setInputText("");
 
     // Add bot response
-    setTimeout(() => {
-      setMessages([
-        ...newMessages,
-        { text: getBotResponse(inputText), isUser: false }
+    try {
+      const botResponse = await getBotResponse(userMessage);
+      setMessages(prevMessages => [
+        ...prevMessages,
+        { text: botResponse, isUser: false }
       ]);
-    }, 500);
+    } catch (error) {
+      console.error("Error in chat:", error);
+    }
   };
 
   return (
@@ -180,7 +174,7 @@ export const ChatWidget = () => {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            placeholder="Type your message..."
+            placeholder="请在输入你的问题。。。"
           />
           <button onClick={handleSendMessage}>Send</button>
         </ChatInput>
