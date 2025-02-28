@@ -4,7 +4,7 @@ const axios = require('axios'); // Make sure axios is installed: npm install axi
 const { spawn } = require('child_process');
 const path = require('path');
 
-// Store session IDs for conversations (in a real app, use a database or Redis)
+// Store session IDs for conversations
 const sessionStore = new Map();
 
 // Generate JWT token
@@ -119,7 +119,8 @@ const getProfile = async (req, res) => {
 const getAIresponse = async (req, res) => {
   try {
     const { message } = req.query;
-    const userId = req.user?._id || 'anonymous';
+    // Convert ObjectId to string to use as Map key
+    const userId = req.user?._id ? req.user._id.toString() : 'anonymous';
     
     if (!message) {
       return res.status(400).json({
@@ -128,8 +129,11 @@ const getAIresponse = async (req, res) => {
       });
     }
     
+    console.log(`User ID for session: ${userId}`);
+    
     // Get session if exists
     const sessionId = sessionStore.get(userId);
+    console.log(`Current session ID: ${sessionId || 'none'}`);
     
     // DashScope API credentials
     const apiKey = process.env.DASHSCOPE_API_KEY || 'sk-8da8842dcb5f4c0bb6421fe2fd76e6d0';
@@ -158,7 +162,9 @@ const getAIresponse = async (req, res) => {
       if (response.status === 200 && response.data && response.data.output) {
         // Store session ID for future conversations
         if (response.data.output.session_id) {
-          sessionStore.set(userId, response.data.output.session_id);
+          const newSessionId = response.data.output.session_id;
+          sessionStore.set(userId, newSessionId);
+          console.log(`New session ID stored: ${newSessionId} for user: ${userId}`);
         }
         
         console.log('Response received from API');
