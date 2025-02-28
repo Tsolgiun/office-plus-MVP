@@ -8,6 +8,6 @@ router.post('/updateAppointmentStatus/:appointmentId',auth, updateAppointmentSta
 router.post('/cancelAppointment/:appointmentId',auth, cancelAppointment);
 router.get('/getBuildingAppointments/:buildingId',auth, getBuildingAppointments);
 router.get('/getUserAppointments/:userId',auth, getUserAppointments);
-router.put('/createAppointment',auth, createAppointment);
+router.post('/createAppointment',auth, createAppointment);
 
 module.exports = router;

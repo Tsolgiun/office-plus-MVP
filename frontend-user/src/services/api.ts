@@ -150,22 +150,22 @@ class ApiService {
   }
 
   // Appointments endpoints
-  async createAppointment(appointmentData: Omit<Appointment, '_id' | 'status'>): Promise<any> {
-    const response = await this.api.put('/appointments/createAppointment', appointmentData);
+  async createAppointment(appointmentData: Omit<Appointment, '_id' | 'status'>): Promise<Appointment> {
+    const response = await this.api.post('/appointments/createAppointment', appointmentData);
     return response.data;
   }
 
-  async getUserAppointments(userId: string): Promise<any> {
+  async getUserAppointments(userId: string): Promise<{ appointments: Appointment[] }> {
     const response = await this.api.get(`/appointments/getUserAppointments/${userId}`);
     return response.data;
   }
 
-  async cancelAppointment(appointmentId: string): Promise<any> {
+  async cancelAppointment(appointmentId: string): Promise<{ message: string }> {
     const response = await this.api.post(`/appointments/cancelAppointment/${appointmentId}`);
     return response.data;
   }
 
-  async getBuildingAppointments(buildingId: string, date?: string): Promise<any> {
+  async getBuildingAppointments(buildingId: string, date?: string): Promise<{ appointments: Appointment[] }> {
     const url = date 
       ? `/appointments/getBuildingAppointments/${buildingId}?date=${date}`
       : `/appointments/getBuildingAppointments/${buildingId}`;
@@ -174,13 +174,13 @@ class ApiService {
     return response.data;
   }
 
-  async updateAppointmentStatus(appointmentId: string, status: string): Promise<any> {
+  async updateAppointmentStatus(appointmentId: string, status: string): Promise<{ message: string }> {
     const response = await this.api.post(`/appointments/updateAppointmentStatus/${appointmentId}`, { status });
     return response.data;
   }
 
   //Ai endpoints
-  async getAIresponse(message: string): Promise<any> {
+  async getAIresponse(message: string): Promise<{ response: string }> {
     const response = await this.api.get(`/auth/getAIresponse`, { params: { message } });
     return response.data;
   }

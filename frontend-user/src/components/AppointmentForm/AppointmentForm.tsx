@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, DatePicker, Button, InputNumber, message, Select } from 'antd';
+import { Form, Input, DatePicker, Button, InputNumber, message as antMessage, Select, App } from 'antd';
 import dayjs from 'dayjs';
 import { useAuthStore } from '../../store/authStore';
 import { api } from '../../services/api';
+import { Appointment } from '../../types/models';
 
 const { TextArea } = Input;
 
@@ -11,11 +12,14 @@ interface AppointmentFormProps {
   onSuccess?: () => void;
 }
 
-// Define an interface for appointments
-interface Appointment {
-  startTime: Date;
-  endTime: Date;
-  // other properties...
+// Define interfaces for the component
+interface FormValues {
+  date: dayjs.Dayjs;
+  timeSlot: string;
+  contactInfo: string;
+  room?: string;
+  purpose: string;
+  attendees: number;
 }
 
 const AppointmentForm: React.FC<AppointmentFormProps> = ({ buildingId, onSuccess }) => {
@@ -87,7 +91,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ buildingId, onSuccess
       }
     } catch (error) {
       console.error('Error fetching appointments:', error);
-      message.error('无法获取可用时间段，请重试');
+      antMessage.error({ content: '无法获取可用时间段，请重试', key: 'fetchError' });
       setAvailableTimeSlots(generateAllTimeSlots());
     } finally {
       setFetchingSlots(false);
@@ -107,9 +111,9 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ buildingId, onSuccess
     form.setFieldValue('timeSlot', undefined);
   };
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: FormValues) => {
     if (!user) {
-      message.error('请先登录');
+      antMessage.error({ content: '请先登录', key: 'loginRequired' });
       return;
     }
 
@@ -134,7 +138,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ buildingId, onSuccess
         attendees: values.attendees || 1,
       });
       
-      message.success('预约申请已提交，请等待确认');
+      antMessage.success({ content: '预约申请已提交，请等待确认', key: 'submitSuccess' });
       form.resetFields();
       
       if (onSuccess) {
@@ -142,7 +146,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ buildingId, onSuccess
       }
     } catch (error) {
       console.error('Error creating appointment:', error);
-      message.error('预约失败，请重试');
+      antMessage.error({ content: '预约失败，请重试', key: 'submitError' });
     } finally {
       setLoading(false);
     }
@@ -154,7 +158,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ buildingId, onSuccess
   }, []);
 
   return (
-    <Form
+    <App>
+      <Form
       form={form}
       layout="vertical"
       onFinish={onFinish}
@@ -229,6 +234,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ buildingId, onSuccess
         </Button>
       </Form.Item>
     </Form>
+    </App>
   );
 };
 
