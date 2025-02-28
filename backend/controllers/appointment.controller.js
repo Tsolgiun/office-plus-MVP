@@ -68,9 +68,10 @@ const getBuildingAppointments = async (req, res) => {
     const { buildingId } = req.params;
     
     const appointments = await Appointment.find({ 
-      building: buildingId,
-      status: 'confirmed'  
-    }).populate('user', 'name email');
+      building: buildingId, 
+    }).populate('userId', 'name email');
+    console.log("here we go !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    console.log(appointments);
     
     return res.json({
       success: true,

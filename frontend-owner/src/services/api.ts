@@ -206,8 +206,21 @@ class ApiService {
   async deleteOfficePhoto(officeId: string, photoUrl: string): Promise<void> {
     await this.api.delete(`/offices/${officeId}/images/${encodeURIComponent(photoUrl)}`);
   }
+
   // appointments endpoints
-  
+  async getBuildingAppointments(buildingId: string, date?: string): Promise<any> {
+    const url = date 
+      ? `/appointments/getBuildingAppointments/${buildingId}?date=${date}`
+      : `/appointments/getBuildingAppointments/${buildingId}`;
+      
+    const response = await this.api.get(url);
+    return response.data;
+  }
+
+  async updateAppointmentStatus(appointmentId: string, status: string): Promise<any> {
+    const response = await this.api.post(`/appointments/updateAppointmentStatus/${appointmentId}`, { status });
+    return response.data;
+  }
 }
 
 export const api = ApiService.getInstance();
