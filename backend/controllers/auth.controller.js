@@ -1,11 +1,7 @@
 const User = require('../models/user.model');
 const jwt = require('jsonwebtoken');
-const axios = require('axios'); // Make sure axios is installed: npm install axios
 const { spawn } = require('child_process');
 const path = require('path');
-
-// Store session IDs for conversations
-const sessionStore = new Map();
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -115,12 +111,10 @@ const getProfile = async (req, res) => {
   }
 };
 
-// Generate AI response using JavaScript implementation
+// AI response using predefined responses
 const getAIresponse = async (req, res) => {
   try {
     const { message } = req.query;
-    // Convert ObjectId to string to use as Map key
-    const userId = req.user?._id ? req.user._id.toString() : 'anonymous';
     
     if (!message) {
       return res.status(400).json({
@@ -128,83 +122,32 @@ const getAIresponse = async (req, res) => {
         message: 'No message provided'
       });
     }
+
+    // Predefined responses
+    const responses = {
+      "hello": "Hello! How can I help you with office spaces today?",
+      "hi": "Hi there! Looking for an office space?",
+      "office": "We offer various office spaces from private offices to open floors.",
+      "price": "Our prices range from ¥3,000 to ¥15,000 per square meter monthly.",
+      "booking": "You can book through our website by clicking 'Book Viewing'.",
+      "default": "I'm here to help with your office space needs. What would you like to know?"
+    };
     
-    console.log(`User ID for session: ${userId}`);
+    // Find matching response or use default
+    let response = responses.default;
+    const lowerMessage = message.toLowerCase();
     
-    // Get session if exists
-    const sessionId = sessionStore.get(userId);
-    console.log(`Current session ID: ${sessionId || 'none'}`);
-    
-    // DashScope API credentials
-    const apiKey = process.env.DASHSCOPE_API_KEY || 'sk-8da8842dcb5f4c0bb6421fe2fd76e6d0';
-    const appId = 'c8159539b1194623b52be93606c4727d';
-    const url = `https://dashscope.aliyuncs.com/api/v1/apps/${appId}/completion`;
-    
-    console.log(`Processing request for message: ${message}`);
-    
-    try {
-      // Call DashScope API
-      const response = await axios.post(url, {
-        input: { 
-          prompt: message, 
-          session_id: sessionId || undefined 
-        },
-        parameters: {},
-        debug: {}
-      }, {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      // Handle successful response
-      if (response.status === 200 && response.data && response.data.output) {
-        // Store session ID for future conversations
-        if (response.data.output.session_id) {
-          const newSessionId = response.data.output.session_id;
-          sessionStore.set(userId, newSessionId);
-          console.log(`New session ID stored: ${newSessionId} for user: ${userId}`);
-        }
-        
-        console.log('Response received from API');
-        
-        return res.json({
-          success: true,
-          response: response.data.output.text
-        });
-      } else {
-        throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
+    for (const [key, value] of Object.entries(responses)) {
+      if (lowerMessage.includes(key)) {
+        response = value;
+        break;
       }
-    } catch (apiError) {
-      console.error('API call failed:', apiError.message);
-      
-      // Fallback responses
-      const fallbackResponses = {
-        "hello": "Hello! How can I help you with office spaces today?",
-        "hi": "Hi there! Looking for an office space?",
-        "office": "We offer various office spaces from private offices to open floors.",
-        "price": "Our prices range from ¥3,000 to ¥15,000 per square meter monthly.",
-        "booking": "You can book through our website by clicking 'Book Viewing'.",
-        "default": "I'm here to help with your office space needs. What would you like to know?"
-      };
-      
-      // Find matching response or use default
-      let fallbackResponse = fallbackResponses.default;
-      const lowerMessage = message.toLowerCase();
-      
-      for (const [key, value] of Object.entries(fallbackResponses)) {
-        if (lowerMessage.includes(key)) {
-          fallbackResponse = value;
-          break;
-        }
-      }
-      
-      return res.json({
-        success: true,
-        response: fallbackResponse
-      });
     }
+    
+    return res.json({
+      success: true,
+      response: response
+    });
   } catch (error) {
     console.error('Error in AI response:', error);
     return res.status(500).json({
