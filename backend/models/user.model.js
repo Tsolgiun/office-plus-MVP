@@ -23,9 +23,17 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['owner', 'admin'],
-    default: 'owner'
-  }
+    enum: ['owner', 'admin', 'user'],
+    default: 'user'
+  },
+  favoriteBuildings: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Building'
+  }],
+  favoriteOffices: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Office'
+  }]
 }, {
   timestamps: true
 });

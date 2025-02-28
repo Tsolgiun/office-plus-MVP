@@ -50,7 +50,6 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [openKeys, setOpenKeys] = useState<string[]>(['offices']);
   const { token: { colorBgContainer } } = theme.useToken();
   const location = useLocation();
   const navigate = useNavigate();
@@ -61,27 +60,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     {
       key: 'dashboard',
       icon: <HomeOutlined />,
-      label: <Link to="/dashboard">Dashboard</Link>,
+      label: <Link to="/dashboard">数据面板</Link>,
     },
     {
       key: 'buildings',
       icon: <BuildOutlined />,
-      label: <Link to="/buildings">Buildings</Link>,
+      label: <Link to="/buildings">写字楼</Link>,
     },
     {
       key: 'offices',
       icon: <AppstoreOutlined />,
-      label: 'Offices',
-      children: [
-        {
-          key: 'offices',
-          label: <Link to="/offices">All Offices</Link>,
-        },
-        {
-          key: 'offices-by-building',
-          label: <Link to="/buildings">By Building</Link>,
-        }
-      ]
+      label: <Link to="/offices">所有的办公室</Link>,
     },
   ];
 
@@ -89,13 +78,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: 'Profile',
+      label: '个人资料',
       onClick: () => navigate('/profile'),
     },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: 'Logout',
+      label: '注销',
       onClick: () => {
         logout();
         navigate('/login');
@@ -103,22 +92,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     },
   ];
 
-  const onOpenChange = (keys: string[]) => {
-    setOpenKeys(keys);
-  };
-
   return (
     <StyledLayout>
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <StyledLogo>
-          {collapsed ? 'OP' : 'Office Plus'}
+          {collapsed ? '直租' : 'office直租'}
         </StyledLogo>
         <Menu
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname.split('/')[1] || 'dashboard']}
-          openKeys={openKeys}
-          onOpenChange={onOpenChange}
           items={menuItems}
         />
       </Sider>

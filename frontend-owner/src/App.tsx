@@ -18,6 +18,7 @@ import Offices from './pages/Offices';
 import CreateOffice from './pages/CreateOffice';
 import EditOffice from './pages/EditOffice';
 import AllOffices from './pages/AllOffices';
+import Appointments from './pages/Appointments';
 
 // Theme configuration
 const theme = {
@@ -54,6 +55,7 @@ const App: React.FC = () => {
                       <Route path="buildings/:buildingId/offices" element={<Offices />} />
                       <Route path="buildings/:buildingId/offices/new" element={<CreateOffice />} />
                       <Route path="buildings/:buildingId/offices/edit/:officeId" element={<EditOffice />} />
+                      <Route path="appointments" element={<Appointments />} />
                     </Routes>
                   </MainLayout>
                 </ProtectedRoute>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Tag, Typography, Space } from 'antd';
 import { EnvironmentOutlined, HomeOutlined, DollarOutlined } from '@ant-design/icons';
+import FavoriteButton from '../FavoriteButton';
 import styled from 'styled-components';
 import { Building } from '../../types/models';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +21,7 @@ const StyledCard = styled(Card)`
   .ant-card-cover {
     height: 200px;
     overflow: hidden;
+    position: relative;
     
     img {
       width: 100%;
@@ -27,6 +29,14 @@ const StyledCard = styled(Card)`
       object-fit: cover;
     }
   }
+`;
+
+const FavoriteButtonWrapper = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  opacity: 1;
 `;
 
 const InfoRow = styled.div`
@@ -56,10 +66,15 @@ const BuildingCard: React.FC<BuildingCardProps> = ({ building }) => {
     <StyledCard
       hoverable
       cover={
-        <img
-          alt={name}
-          src={photos[0] || '/placeholder-building.jpg'}
-        />
+        <div>
+          <img
+            alt={name}
+            src={photos[0] || '/placeholder-building.jpg'}
+          />
+          <FavoriteButtonWrapper onClick={e => e.stopPropagation()}>
+            <FavoriteButton itemId={building._id} type="building" />
+          </FavoriteButtonWrapper>
+        </div>
       }
       onClick={() => navigate(`/buildings/${building._id}`)}
     >

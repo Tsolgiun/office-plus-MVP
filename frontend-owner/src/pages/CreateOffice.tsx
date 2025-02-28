@@ -14,7 +14,7 @@ const CreateOffice: React.FC = () => {
 
   return (
     <Card>
-      <Title level={2}>Add New Office</Title>
+      <Title level={2}>添加新的办公室</Title>
       <OfficeForm mode="create" buildingId={buildingId} />
     </Card>
   );

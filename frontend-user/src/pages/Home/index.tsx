@@ -41,32 +41,32 @@ const Home: React.FC = () => {
 
   const features = [
     {
-      title: 'Extensive Selection',
-      description: 'Browse through a wide range of office spaces across different locations.',
+      title: '广泛的选择',
+      description: '浏览不同地点的各种办公空间',
     },
     {
-      title: 'Easy Booking',
-      description: 'Schedule viewings and make appointments with just a few clicks.',
+      title: '轻松的预订',
+      description: '只需简单操作即可安排看房时间和预约',
     },
     {
-      title: 'Detailed Information',
-      description: 'Get comprehensive details about each office space including amenities and pricing.',
+      title: '详尽的信息',
+      description: '获取每个办公室的详细信息，包括设施和价格',
     },
   ];
 
   return (
     <>
       <HeroSection>
-        <StyledTitle level={1}>Find Your Perfect Office Space</StyledTitle>
+        <StyledTitle level={1}>找到你理想的办公空间</StyledTitle>
         <SearchSection>
           <Input
             size="large"
-            placeholder="Search by location or building name"
+            placeholder="按位置或建筑名称搜索"
             prefix={<SearchOutlined />}
             onPressEnter={() => navigate('/search')}
             suffix={
               <Button type="primary" onClick={() => navigate('/search')}>
-                Search
+                查找
               </Button>
             }
           />
@@ -75,7 +75,7 @@ const Home: React.FC = () => {
 
       <div style={{ padding: '48px 0' }}>
         <Title level={2} style={{ textAlign: 'center', marginBottom: 48 }}>
-          Why Choose Office Plus?
+          为什么选择office plus ?
         </Title>
         <Row gutter={[24, 24]}>
           {features.map((feature, index) => (

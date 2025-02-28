@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Typography, Input, Select, Space, Empty, Spin } from 'antd';
+import { Row, Col, Typography, Input, Select, Empty, Spin } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import BuildingCard from '../../components/BuildingCard';
@@ -9,12 +9,46 @@ import { api } from '../../services/api';
 const { Title } = Typography;
 const { Option } = Select;
 
-const FiltersContainer = styled.div`
-  margin-bottom: 24px;
+const PageLayout = styled.div`
+  display: flex;
+  gap: 24px;
+  min-height: calc(100vh - 64px); /* Adjust based on your header height */
+`;
+
+const Sidebar = styled.div`
+  width: 280px;
+  flex-shrink: 0;
+  background: white;
   padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  height: fit-content;
+  position: sticky;
+  top: 24px;
+`;
+
+const MainContent = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+`;
+
+const WelcomeSection = styled.div`
+  margin-bottom: 24px;
+  text-align: center;
+  padding: 48px 24px;
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+`;
+
+const StyledTitle = styled(Title)`
+  margin-bottom: 16px !important;
+`;
+
+const StyledSelect = styled(Select<string>)`
+  width: 100% !important;
+  margin-top: 16px;
 `;
 
 const Buildings: React.FC = () => {
@@ -68,44 +102,48 @@ const Buildings: React.FC = () => {
   }
 
   return (
-    <div>
-      <Title level={2}>Office Buildings</Title>
-      
-      <FiltersContainer>
-        <Space size="large" style={{ width: '100%' }}>
-          <Input
-            placeholder="Search buildings..."
-            prefix={<SearchOutlined />}
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            style={{ width: 300 }}
-          />
-          <Select
-            value={sortBy}
-            onChange={setSortBy}
-            style={{ width: 200 }}
-          >
-            <Option value="name">Name A-Z</Option>
-            <Option value="price-asc">Price: Low to High</Option>
-            <Option value="price-desc">Price: High to Low</Option>
-            <Option value="area-asc">Area: Small to Large</Option>
-            <Option value="area-desc">Area: Large to Small</Option>
-          </Select>
-        </Space>
-      </FiltersContainer>
+    <PageLayout>
+      <Sidebar>
+        <StyledTitle level={4}>筛选</StyledTitle>
+        <Input
+          placeholder="查找写字楼"
+          prefix={<SearchOutlined />}
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
+        <StyledSelect
+          value={sortBy}
+          onChange={setSortBy}
+        >
+          <Option value="name">名字: A-Z排序</Option>
+          <Option value="price-asc">价格: 从低到高</Option>
+          <Option value="price-desc">价格: 从高到低</Option>
+          <Option value="area-asc">面积: 从小到大</Option>
+          <Option value="area-desc">面积: 从大到小</Option>
+        </StyledSelect>
+      </Sidebar>
 
-      {sortedAndFilteredBuildings.length === 0 ? (
-        <Empty description="No buildings found" />
-      ) : (
-        <Row gutter={[24, 24]}>
-          {sortedAndFilteredBuildings.map(building => (
-            <Col xs={24} sm={12} lg={8} key={building._id}>
-              <BuildingCard building={building} />
-            </Col>
-          ))}
-        </Row>
-      )}
-    </div>
+      <MainContent>
+        <WelcomeSection>
+          <StyledTitle>找到最适合你的办公场所</StyledTitle>
+          <Typography.Text>
+            探索我们优质的办公楼宇，找到最适合你的办公场所
+          </Typography.Text>
+        </WelcomeSection>
+
+        {sortedAndFilteredBuildings.length === 0 ? (
+          <Empty description="没有找到合适的写字楼" />
+        ) : (
+          <Row gutter={[24, 24]} justify="center">
+            {sortedAndFilteredBuildings.map(building => (
+              <Col xs={24} sm={12} lg={8} xl={8} key={building._id}>
+                <BuildingCard building={building} />
+              </Col>
+            ))}
+          </Row>
+        )}
+      </MainContent>
+    </PageLayout>
   );
 };
 

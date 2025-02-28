@@ -4,6 +4,7 @@ import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Office } from '../types/models';
 import { api } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import ImageUpload from './ImageUpload';
 
 interface OfficeFormProps {
   buildingId: string;
@@ -21,6 +22,7 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [officeId, setOfficeId] = useState<string | null>(initialValues?._id || null);
 
   useEffect(() => {
     if (initialValues) {
@@ -37,6 +39,10 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
     }
   };
 
+  const handleImagesChange = (photos: string[]) => {
+    form.setFieldValue('photos', photos);
+  };
+
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
@@ -50,8 +56,10 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
       };
 
       if (mode === 'create') {
-        await api.createOffice(officeData);
-        message.success('Office created successfully');
+        const response = await api.createOffice(officeData);
+        setOfficeId(response._id);
+        message.success('Office created successfully. You can now upload images.');
+        // Don't navigate away in create mode - allow image upload first
       } else {
         if (!initialValues?._id) {
           throw new Error('Office ID not found');
@@ -59,8 +67,10 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
         await api.updateOffice(initialValues._id, officeData);
         message.success('Office updated successfully');
       }
-      onSuccess?.();
-      navigate(`/buildings/${buildingId}/offices`);
+      if (mode === 'edit') {
+        onSuccess?.();
+        navigate(`/buildings/${buildingId}/offices`);
+      }
     } catch (error) {
       console.error('Error saving office:', error);
       message.error('Error saving office. Please try again.');
@@ -84,11 +94,11 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
     >
       <Form.Item
         name="floor"
-        label="Floor"
-        rules={[{ required: true, message: 'Please enter floor number' }]}
+        label="楼层"
+        rules={[{ required: true, message: '请添加楼层号' }]}
       >
         <InputNumber
-          placeholder="Enter floor number"
+          placeholder="添加楼层号"
           style={{ width: '100%' }}
           min={1}
         />
@@ -96,11 +106,11 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
 
       <Form.Item
         name="area"
-        label="Area (㎡)"
-        rules={[{ required: true, message: 'Please enter area' }]}
+        label="面积 (㎡)"
+        rules={[{ required: true, message: '请添加面积' }]}
       >
         <InputNumber
-          placeholder="Enter area"
+          placeholder="添加面积"
           style={{ width: '100%' }}
           min={0}
           step={0.5}
@@ -110,11 +120,11 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
 
       <Form.Item
         name="pricePerUnit"
-        label="Price per ㎡ per Month (¥)"
-        rules={[{ required: true, message: 'Please enter price per unit' }]}
+        label="元/㎡/月"
+        rules={[{ required: true, message: '请添加 元/㎡/月' }]}
       >
         <InputNumber
-          placeholder="Enter price per ㎡"
+          placeholder="请添每㎡价格"
           style={{ width: '100%' }}
           min={0}
           step={0.01}
@@ -124,7 +134,7 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
 
       <Form.Item
         name="totalPrice"
-        label="Total Price per Month (¥)"
+        label="月租(¥)"
       >
         <InputNumber
           style={{ width: '100%' }}
@@ -134,10 +144,10 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
 
       <Form.Item
         name="efficiency"
-        label="Space Efficiency (%)"
+        label="空间利用率 (%)"
         rules={[
-          { required: true, message: 'Please enter efficiency' },
-          { type: 'number', min: 0, max: 100, message: 'Efficiency must be between 0 and 100' }
+          { required: true, message: '请添加空间利用率' },
+          { type: 'number', min: 0, max: 100, message: '利用率必须是0-100' }
         ]}
       >
         <InputNumber
@@ -151,11 +161,11 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
 
       <Form.Item
         name="capacity"
-        label="Capacity (persons)"
-        rules={[{ required: true, message: 'Please enter capacity' }]}
+        label="容量 (人数)"
+        rules={[{ required: true, message: '请添加容量(人数)' }]}
       >
         <InputNumber
-          placeholder="Enter capacity"
+          placeholder="添加容量(人数)"
           style={{ width: '100%' }}
           min={1}
         />
@@ -163,39 +173,39 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
 
       <Form.Item
         name="renovation"
-        label="Renovation"
-        rules={[{ required: true, message: 'Please select renovation status' }]}
+        label="装修"
+        rules={[{ required: true, message: '请选择专修程度' }]}
       >
-        <Select placeholder="Select renovation status">
-          <Select.Option value="furnished">Furnished</Select.Option>
-          <Select.Option value="unfurnished">Unfurnished</Select.Option>
-          <Select.Option value="custom">Custom</Select.Option>
+        <Select placeholder="选择装修程度">
+          <Select.Option value="furnished">精装</Select.Option>
+          <Select.Option value="unfurnished">简装</Select.Option>
+          <Select.Option value="custom">毛坯</Select.Option>
         </Select>
       </Form.Item>
 
       <Form.Item
         name="orientation"
-        label="Orientation"
-        rules={[{ required: true, message: 'Please select orientation' }]}
+        label="朝向"
+        rules={[{ required: true, message: '请选择朝向' }]}
       >
-        <Select placeholder="Select orientation">
-          <Select.Option value="north">North</Select.Option>
-          <Select.Option value="south">South</Select.Option>
-          <Select.Option value="east">East</Select.Option>
-          <Select.Option value="west">West</Select.Option>
-          <Select.Option value="northeast">Northeast</Select.Option>
-          <Select.Option value="northwest">Northwest</Select.Option>
-          <Select.Option value="southeast">Southeast</Select.Option>
-          <Select.Option value="southwest">Southwest</Select.Option>
+        <Select placeholder="选择朝向">
+          <Select.Option value="north">北</Select.Option>
+          <Select.Option value="south">南</Select.Option>
+          <Select.Option value="east">东</Select.Option>
+          <Select.Option value="west">西</Select.Option>
+          <Select.Option value="northeast">东北</Select.Option>
+          <Select.Option value="northwest">西北</Select.Option>
+          <Select.Option value="southeast">东南</Select.Option>
+          <Select.Option value="southwest">西南</Select.Option>
         </Select>
       </Form.Item>
 
       <Form.Item
         name="leaseTerm"
-        label="Lease Term"
-        rules={[{ required: true, message: 'Please enter lease term' }]}
+        label="租期"
+        rules={[{ required: true, message: '请添加租期' }]}
       >
-        <Select placeholder="Select lease term">
+        <Select placeholder="选择租期">
           <Select.Option value="1-year">1 Year</Select.Option>
           <Select.Option value="2-year">2 Years</Select.Option>
           <Select.Option value="3-year">3 Years</Select.Option>
@@ -205,20 +215,56 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
 
       <Form.Item
         name="status"
-        label="Status"
-        rules={[{ required: true, message: 'Please select status' }]}
+        label="状态"
+        rules={[{ required: true, message: '请选择状态' }]}
       >
-        <Select placeholder="Select status">
-          <Select.Option value="available">Available</Select.Option>
-          <Select.Option value="rented">Rented</Select.Option>
-          <Select.Option value="pending">Pending</Select.Option>
-          <Select.Option value="maintenance">Maintenance</Select.Option>
+        <Select placeholder="选择状态">
+          <Select.Option value="available">可用的</Select.Option>
+          <Select.Option value="rented">租用的</Select.Option>
+          <Select.Option value="pending">待定</Select.Option>
+          <Select.Option value="maintenance">维护中</Select.Option>
         </Select>
       </Form.Item>
 
+      {mode === 'create' ? (
+        officeId && (
+          <Form.Item
+            name="photos"
+            label="Office Photos"
+          >
+            <div>
+              <p>Office created successfully! You can now upload images.</p>
+              <ImageUpload
+                photos={form.getFieldValue('photos') || []}
+                onImagesChange={handleImagesChange}
+                endpoint={`/offices/${officeId}/images`}
+              />
+              <Button 
+                type="primary" 
+                onClick={() => navigate(`/buildings/${buildingId}/offices`, { replace: true })}
+                style={{ marginTop: 16 }}
+              >
+                Done - Go to Offices List
+              </Button>
+            </div>
+          </Form.Item>
+        )
+      ) : (
+        <Form.Item
+          name="photos"
+          label="Office Photos"
+        >
+          <ImageUpload
+            photos={form.getFieldValue('photos') || []}
+            onImagesChange={handleImagesChange}
+            endpoint={`/offices/${initialValues?._id}/images`}
+          />
+        </Form.Item>
+      )}
+
       <Form.List name="tags">
         {(fields, { add, remove }) => (
-          <Form.Item label="Tags">
+          <Form.Item label="标签">
             {fields.map((field, index) => (
               <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }}>
                 <Form.Item
@@ -253,10 +299,10 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
       <Form.Item>
         <Space>
           <Button type="primary" htmlType="submit" loading={loading}>
-            {mode === 'create' ? 'Create Office' : 'Update Office'}
+            {mode === 'create' ? '创建办公室' : '更新办公室'}
           </Button>
           <Button onClick={() => navigate(`/buildings/${buildingId}/offices`)}>
-            Cancel
+            取消
           </Button>
         </Space>
       </Form.Item>

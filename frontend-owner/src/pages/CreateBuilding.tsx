@@ -7,7 +7,7 @@ const { Title } = Typography;
 const CreateBuilding: React.FC = () => {
   return (
     <Card>
-      <Title level={2}>Add New Building</Title>
+      <Title level={2}>添加写字楼</Title>
       <BuildingForm mode="create" />
     </Card>
   );
