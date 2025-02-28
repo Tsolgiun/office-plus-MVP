@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChatWidget } from '../Chat/ChatWidget';
-import { Layout, Menu, Button, Space, theme, Dropdown } from 'antd';
+import { Layout, Menu, Button, theme, Dropdown } from 'antd';
 import {
   BuildOutlined,
   HeartOutlined,
@@ -35,20 +35,37 @@ const Logo = styled(Link)`
   font-weight: bold;
   color: #1890ff;
   margin-right: 48px;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
 `;
 
 const StyledMenu = styled(Menu)`
+  line-height: 64px;
+  height: 64px;
+  border-bottom: none;
+
   .ant-menu-item {
     display: inline-flex;
     align-items: center;
     margin: 0 4px;
+    padding: 0 16px;
+    height: 64px;
+    line-height: 64px;
     
     a {
       display: flex;
       align-items: center;
       gap: 8px;
+      height: 100%;
     }
   }
+`;
+
+const HeaderSection = styled.div`
+  display: flex;
+  align-items: center;
+  height: 64px;
 `;
 
 const StyledContent = styled(Content)`
@@ -102,17 +119,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <StyledLayout>
       <StyledHeader>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Logo to="/">Office Plus</Logo>
+        <HeaderSection>
+          <Logo to="/">office直租</Logo>
           <StyledMenu
             mode="horizontal"
             selectedKeys={[location.pathname.split('/')[1] || 'buildings']}
             items={menuItems}
           />
-        </div>
-        <Space>
+        </HeaderSection>
+        <HeaderSection>
           {isLoggedIn ? (
-            <Space>
+            <>
               <StyledMenu
                 mode="horizontal"
                 selectedKeys={[location.pathname.split('/')[1]]}
@@ -133,18 +150,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   {user?.username}
                 </Button>
               </Dropdown>
-            </Space>
+            </>
           ) : (
-            <Space>
+            <div style={{ display: 'flex', gap: '8px' }}>
               <Button type="text" onClick={() => navigate('/login')}>
                 登陆
               </Button>
               <Button type="primary" onClick={() => navigate('/register')}>
                 注册
               </Button>
-            </Space>
+            </div>
           )}
-        </Space>
+        </HeaderSection>
       </StyledHeader>
       <StyledContent>
         {children}

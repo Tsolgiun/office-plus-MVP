@@ -96,7 +96,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     <StyledLayout>
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <StyledLogo>
-          {collapsed ? 'OP' : 'Office Plus'}
+          {collapsed ? '直租' : 'office直租'}
         </StyledLogo>
         <Menu
           theme="dark"
