@@ -12,6 +12,8 @@ import BuildingDetail from './pages/Buildings/BuildingDetail';
 import OfficeDetail from './pages/Offices/OfficeDetail';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
+import CreateAppointment from './pages/Appointment/CreateAppointment';
+import GetAppointment from './pages/Appointment/GetAppointment';
 
 const theme = {
   token: {
@@ -53,12 +55,13 @@ const App: React.FC = () => {
                 <Route path="/buildings" element={<Buildings />} />
                 <Route path="/buildings/:id" element={<BuildingDetail />} />
                 <Route path="/buildings/:buildingId/offices/:officeId" element={<OfficeDetail />} />
+                <Route path="/buildings/:buildingId/appointment" element={<CreateAppointment />} />
                 <Route path="/offices" element={<Offices />} />
                 <Route path="/offices/:id" element={<OfficeDetail />} />
                 
                 {/* Protected Routes */}
                 <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
-                <Route path="/appointments" element={<ProtectedRoute><div>Appointments</div></ProtectedRoute>} />
+                <Route path="/appointments" element={<GetAppointment />} />
                 <Route path="/profile" element={<ProtectedRoute><div>Profile</div></ProtectedRoute>} />
               </Routes>
             </Suspense>

@@ -10,7 +10,7 @@ const authRoutes = require('./routes/auth.routes');
 const buildingRoutes = require('./routes/building.routes');
 const officeRoutes = require('./routes/office.routes');
 const favoriteRoutes = require('./routes/favorite.routes');
-
+const appointmentRoutes = require('./routes/appointment.routes');
 // Load environment variables
 dotenv.config();
 
@@ -44,6 +44,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/buildings', buildingRoutes);
 app.use('/api/offices', officeRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 // 404 handler
 app.use((req, res) => {

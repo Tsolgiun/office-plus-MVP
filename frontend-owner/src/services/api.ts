@@ -206,6 +206,8 @@ class ApiService {
   async deleteOfficePhoto(officeId: string, photoUrl: string): Promise<void> {
     await this.api.delete(`/offices/${officeId}/images/${encodeURIComponent(photoUrl)}`);
   }
+  // appointments endpoints
+  
 }
 
 export const api = ApiService.getInstance();

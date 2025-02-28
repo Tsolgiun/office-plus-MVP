@@ -164,6 +164,22 @@ const Dashboard: React.FC = () => {
             />
           </Card>
         </Col>
+        <Col xs={24} lg={12}>
+          <Card title="新的预约" extra={<ClockCircleOutlined />}>
+            <List
+              dataSource={recentOffices}
+              renderItem={office => (
+                <StyledCard
+                  size="small"
+                  style={{ marginBottom: '8px' }}
+                  onClick={() => navigate(`/buildings/${office.buildingId}/offices/${office._id}`)}
+                >
+                  
+                </StyledCard>
+              )}
+            />
+          </Card>
+        </Col>
       </Row>
     </div>
   );
