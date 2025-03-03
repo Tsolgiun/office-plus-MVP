@@ -11,6 +11,10 @@ export interface Building {
   location: {
     address: string;
     metro: string;
+    coordinates?: {
+      lng: number;
+      lat: number;
+    };
   };
   priceRange: {
     min: number;
