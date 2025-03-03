@@ -181,7 +181,6 @@ const updateProfile = async (req, res) => {
 };
 
 
-// AI response using predefined responses
 const getAIresponse = async (req, res) => {
   try {
     const { message } = req.query;
