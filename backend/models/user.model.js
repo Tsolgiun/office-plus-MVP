@@ -26,6 +26,12 @@ const userSchema = new mongoose.Schema({
     enum: ['owner', 'admin', 'user'],
     default: 'user'
   },
+  phone: {
+    type: String,
+    required: false,
+    unique: true,
+    trim: true
+  },
   favoriteBuildings: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Building'

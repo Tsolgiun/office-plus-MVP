@@ -79,6 +79,11 @@ class ApiService {
     return response.data;
   }
 
+  async updateProfile(userData: Partial<User>): Promise<any> {
+    const response: AxiosResponse<User> = await this.api.put('/auth/updateProfile', userData);
+    return response.data;
+  }
+
   // Building endpoints - Owner access
   async createBuilding(buildingData: Partial<Building>): Promise<Building> {
     const response: AxiosResponse<{ building: Building }> = await this.api.post('/buildings', buildingData);
