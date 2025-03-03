@@ -33,13 +33,14 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
     }
   }, [initialValues, form]);
 
-  const handleLocationSelect = (location: { lng: number; lat: number }) => {
+  const handleLocationSelect = (location: { lng: number; lat: number }, address?: string) => {
     setCurrentLocation(location);
     const currentLocation = form.getFieldValue('location') || {};
     form.setFieldsValue({
       location: {
         ...currentLocation,
-        coordinates: location
+        coordinates: location,
+        address: address || currentLocation.address
       }
     });
   };
@@ -123,7 +124,18 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
       </Form.Item>
 
       <Form.Item
-        label="地址"
+        label="位置选择"
+        tooltip="搜索地址或点击地图选择位置"
+      >
+        <AMapComponent
+          initialLocation={currentLocation}
+          onLocationSelect={handleLocationSelect}
+          showSearch={true}
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="地址信息"
         required
       >
         <Input.Group compact>
@@ -142,16 +154,6 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
             <Input placeholder="最近的地铁" style={{ width: '30%' }} />
           </Form.Item>
         </Input.Group>
-      </Form.Item>
-
-      <Form.Item
-        label="位置选择"
-        tooltip="点击地图或拖动标记选择位置"
-      >
-        <AMapComponent
-          initialLocation={currentLocation}
-          onLocationSelect={handleLocationSelect}
-        />
       </Form.Item>
 
       <Form.Item label="价格区间 (¥/㎡/月)" required>
