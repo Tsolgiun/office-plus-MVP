@@ -153,7 +153,7 @@ const updateProfile = async (req, res) => {
 // Generate AI response using JavaScript implementation
 const getAIresponse = async (req, res) => {
   try {
-    const { message } = req.query;
+    const { message } = req.params;
     const userId = req.user?._id ? req.user._id.toString() : 'anonymous';
 
     if (!message) {
@@ -196,30 +196,38 @@ const getAIresponse = async (req, res) => {
 
       let fullResponse = '';
       let receivedSessionId = null;
-
+      console.log(response.data);
       // 处理流式响应
       response.data.on('data', (chunk) => {
         try {
-          const chunkStr = chunk.toString().trim();
-          if (!chunkStr) return;
-
-          // 解析JSON格式的块数据
-          const eventData = JSON.parse(chunkStr);
+          const lines = chunk.toString().split('\n').filter(line => line.trim() !== '');
           
-          // 保存会话ID
-          if (eventData.output?.session_id) {
-            receivedSessionId = eventData.output.session_id;
-            sessionStore.set(userId, receivedSessionId);
-          }
+          for (const line of lines) {
+            // Only parse lines that start with "data:"
+            if (line.startsWith('data:')) {
+              const jsonData = line.slice(5).trim(); // Remove "data:" prefix
+              if (jsonData) {
+                const parsedData = JSON.parse(jsonData);
+                // Process the parsed data
+                // 保存会话ID
+                if (parsedData.output?.session_id) {
+                  receivedSessionId = parsedData.output.session_id;
+                  sessionStore.set(userId, receivedSessionId);
+                }
 
-          // 发送增量输出
-          if (eventData.output?.text) {
-            fullResponse += eventData.output.text;
-            // 使用SSE格式发送数据
-            res.write(`data: ${JSON.stringify({ text: eventData.output.text })}\n\n`);
+                // 发送增量输出
+                if (parsedData.output?.text) {
+                  fullResponse += parsedData.output.text;
+                  // 使用SSE格式发送数据
+                  res.write(`data: ${JSON.stringify({ text: parsedData.output.text })}\n\n`);
+                }
+              }
+            }
+            // Handle other SSE fields like "id:" or "event:" if needed
           }
-        } catch (e) {
-          console.error('Error processing chunk:', e);
+        } catch (error) {
+          console.error('Error processing chunk:', error);
+          // Handle error appropriately
         }
       });
 

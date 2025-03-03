@@ -186,8 +186,31 @@ class ApiService {
 
   //Ai endpoints
   async getAIresponse(message: string): Promise<{ response: string }> {
-    const response = await this.api.get(`/auth/getAIresponse`, { params: { message } });
+    const response = await this.api.get(`/auth/getAIresponse/${encodeURIComponent(message)}`);
     return response.data;
+  }
+  
+  // Get the base URL with token for EventSource connections
+  getEventSourceUrl(endpoint: string, params: Record<string, string> = {}): string {
+    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const token = localStorage.getItem('token');
+    
+    // Build the URL with query parameters
+    const url = new URL(`${baseURL}${endpoint}`);
+    
+    // Add query parameters (for non-path parameters)
+    Object.entries(params).forEach(([key, value]) => {
+      if (!endpoint.includes(`:${key}`)) {
+        url.searchParams.append(key, value);
+      }
+    });
+    
+    // Add token if available
+    if (token) {
+      url.searchParams.append('token', token);
+    }
+    
+    return url.toString();
   }
 }
 

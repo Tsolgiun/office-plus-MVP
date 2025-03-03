@@ -6,7 +6,7 @@ const { register, login, getProfile,getAIresponse,updateProfile } = require('../
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
-router.get('/getAIresponse',auth,getAIresponse)
+router.get('/getAIresponse/:message',auth,getAIresponse)
 // Protected routes
 router.get('/profile', auth, getProfile);
 router.put('/updateProfile', auth, updateProfile);

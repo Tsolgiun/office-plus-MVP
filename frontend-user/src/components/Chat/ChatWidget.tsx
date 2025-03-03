@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef ,useEffect} from 'react';
 import styled from 'styled-components';
 import {api} from '../../services/api';
 
@@ -105,6 +105,58 @@ const Message = styled.div<{ isUser: boolean }>`
   `}
 `;
 
+const BotMessage = styled.div`
+  background-color: #f0f0f0;
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 18px;
+  margin-bottom: 8px;
+  max-width: 80%;
+  word-wrap: break-word;
+  align-self: flex-start;
+
+  &.typing {
+    display: flex;
+    align-items: center;
+    height: 32px;
+  }
+
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+  }
+
+  .typing-dot {
+    background-color: #999;
+    border-radius: 50%;
+    width: 8px;
+    height: 8px;
+    margin: 0 2px;
+    animation: typing-animation 1.5s infinite ease-in-out;
+  }
+
+  .typing-dot:nth-child(1) {
+    animation-delay: 0s;
+  }
+
+  .typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes typing-animation {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+`;
+
 interface ChatMessage {
   text: string;
   isUser: boolean;
@@ -115,7 +167,20 @@ export const ChatWidget = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { text: "您好！ 我今天可以帮助你什么？", isUser: false }
   ]);
-  const [inputText, setInputText] = useState("");
+  const [userInput, setUserInput] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Function to scroll to bottom of messages
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const getBotResponse = async (userMessage: string): Promise<string> => {
     try {
@@ -128,27 +193,111 @@ export const ChatWidget = () => {
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
+  useEffect(() => {
+    return () => {
+      // Clean up on unmount
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, []);
 
-    const userMessage = inputText;
-    const newMessages = [
-      ...messages,
-      { text: userMessage, isUser: true }
-    ];
-    setMessages(newMessages);
-    setInputText("");
-
-    // Add bot response
-    try {
-      const botResponse = await getBotResponse(userMessage);
-      setMessages(prevMessages => [
-        ...prevMessages,
-        { text: botResponse, isUser: false }
-      ]);
-    } catch (error) {
-      console.error("Error in chat:", error);
+  const getStreamingResponse = (userMessage: string) => {
+    // Close any existing connection
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
     }
+    
+    // Add placeholder message that will be updated with streaming content
+    setMessages(prev => [...prev, { text: '...', isUser: false }]);
+    setIsProcessing(true);
+    
+    // Get the correct URL from the API service - use path parameter format now
+    const encodedMessage = encodeURIComponent(userMessage);
+    const eventSourceUrl = api.getEventSourceUrl(`/auth/getAIresponse/${encodedMessage}`);
+    
+    // Create new EventSource connection
+    const eventSource = new EventSource(eventSourceUrl);
+    eventSourceRef.current = eventSource;
+    
+    let responseText = '';
+    
+    // Handle regular message chunks
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        responseText += data.text;
+        
+        // Update the last message with the accumulating text
+        setMessages(prev => [
+          ...prev.slice(0, prev.length - 1),
+          { text: responseText, isUser: false }
+        ]);
+      } catch (error) {
+        console.error('Error parsing message:', error);
+      }
+    };
+    
+    // Listen for end of stream
+    eventSource.addEventListener('end', () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+      setIsProcessing(false);
+    });
+    
+    // Listen for errors
+    eventSource.onerror = (error) => {
+      console.error('EventSource error:', error);
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+      
+      // If we haven't received any content yet, show an error message
+      if (!responseText) {
+        setMessages(prev => [
+          ...prev.slice(0, prev.length - 1),
+          { text: "Sorry, I'm having trouble connecting. Please try again later.", isUser: false }
+        ]);
+      }
+      setIsProcessing(false);
+    };
+  };
+
+  const handleSendMessage = async () => {
+    if (!userInput.trim()) return;
+
+    // Add user message
+    const userMessage = userInput.trim();
+    setMessages(prev => [...prev, { text: userMessage, isUser: true }]);
+    setUserInput("");
+
+    // Use streaming response (don't await it or try to use its return value)
+    getStreamingResponse(userMessage);
+  };
+
+  const renderMessages = () => {
+    return messages.map((msg, index) => (
+      <Message key={index} isUser={msg.isUser}>
+        {msg.isUser ? (
+          msg.text
+        ) : (
+          msg.text === '...' ? (
+            <BotMessage className="typing">
+              <div className="typing-indicator">
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+              </div>
+            </BotMessage>
+          ) : (
+            msg.text
+          )
+        )}
+      </Message>
+    ));
   };
 
   return (
@@ -161,18 +310,15 @@ export const ChatWidget = () => {
         <ChatHeader>Office+ Support</ChatHeader>
         
         <ChatMessages>
-          {messages.map((message, index) => (
-            <Message key={index} isUser={message.isUser}>
-              {message.text}
-            </Message>
-          ))}
+          {renderMessages()}
+          <div ref={messagesEndRef} />
         </ChatMessages>
         
         <ChatInput>
           <input
             type="text"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="请在输入你的问题。。。"
           />

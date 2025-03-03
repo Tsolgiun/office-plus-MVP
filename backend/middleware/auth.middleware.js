@@ -3,7 +3,13 @@ const User = require('../models/user.model');
 
 const auth = async (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    // Check Authorization header first
+    let token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    // If no token in header, check query parameters (for EventSource)
+    if (!token && req.query.token) {
+      token = req.query.token;
+    }
     
     if (!token) {
       return res.status(401).json({ message: 'Authentication required' });
