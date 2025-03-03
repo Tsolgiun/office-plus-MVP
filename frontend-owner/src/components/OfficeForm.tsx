@@ -3,7 +3,7 @@ import { Form, Input, InputNumber, Select, Button, Space, message } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Office } from '../types/models';
 import { api } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ImageUpload from './ImageUpload';
 
 interface OfficeFormProps {
@@ -21,8 +21,10 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
 }) => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [officeId, setOfficeId] = useState<string | null>(initialValues?._id || null);
+  const isFromBuildingContext = location.pathname.startsWith('/buildings/');
 
   useEffect(() => {
     if (initialValues) {
@@ -69,7 +71,12 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
       }
       if (mode === 'edit') {
         onSuccess?.();
-        navigate(`/buildings/${buildingId}/offices`);
+        // Return to either building offices or all offices list
+        if (isFromBuildingContext) {
+          navigate(`/buildings/${buildingId}/offices`, { replace: true });
+        } else {
+          navigate('/offices', { replace: true });
+        }
       }
     } catch (error) {
       console.error('Error saving office:', error);
@@ -301,7 +308,13 @@ const OfficeForm: React.FC<OfficeFormProps> = ({
           <Button type="primary" htmlType="submit" loading={loading}>
             {mode === 'create' ? '创建办公室' : '更新办公室'}
           </Button>
-          <Button onClick={() => navigate(`/buildings/${buildingId}/offices`)}>
+          <Button onClick={() => {
+            if (isFromBuildingContext) {
+              navigate(`/buildings/${buildingId}/offices`, { replace: true });
+            } else {
+              navigate('/offices', { replace: true });
+            }
+          }}>
             取消
           </Button>
         </Space>

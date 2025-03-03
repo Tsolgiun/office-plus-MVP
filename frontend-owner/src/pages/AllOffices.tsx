@@ -188,7 +188,7 @@ const AllOffices: React.FC = () => {
             <Button
               type="link"
               icon={<EditOutlined />}
-              onClick={() => navigate(`/buildings/${record.buildingId}/offices/${record._id}/edit`)}
+              onClick={() => navigate(`/buildings/${record.buildingId}/offices/edit/${record._id}`)}
             />
           </Tooltip>
           <Tooltip title="删除">
