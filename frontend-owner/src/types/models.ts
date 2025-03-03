@@ -2,7 +2,8 @@ export interface User {
   _id: string;
   username: string;
   email: string;
-  role: 'owner' | 'tenant' | 'admin';
+  phone?: string;
+  role: 'owner' | 'tenant' | 'admin' | 'user';
 }
 
 export interface Building {

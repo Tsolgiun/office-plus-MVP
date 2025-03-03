@@ -111,56 +111,158 @@ const getProfile = async (req, res) => {
   }
 };
 
+// Update user profile
+const updateProfile = async (req, res) => {
+  try {
+    const { username, email, phone } = req.body;
+    const userId = req.user._id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.username = username;
+    user.email = email;
+    user.phone = phone;
+
+    await user.save();
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        phone: user.phone
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error updating profile',
+      error: error.message
+    });
+  }
+};
+
+
 // AI response using predefined responses
 const getAIresponse = async (req, res) => {
   try {
     const { message } = req.query;
-    
+    const userId = req.user?._id ? req.user._id.toString() : 'anonymous';
+
     if (!message) {
       return res.status(400).json({
         success: false,
         message: 'No message provided'
       });
     }
-
-    // Predefined responses
-    const responses = {
-      "hello": "Hello! How can I help you with office spaces today?",
-      "hi": "Hi there! Looking for an office space?",
-      "office": "We offer various office spaces from private offices to open floors.",
-      "price": "Our prices range from ¥3,000 to ¥15,000 per square meter monthly.",
-      "booking": "You can book through our website by clicking 'Book Viewing'.",
-      "default": "I'm here to help with your office space needs. What would you like to know?"
-    };
     
-    // Find matching response or use default
-    let response = responses.default;
-    const lowerMessage = message.toLowerCase();
+    console.log(`User ID for session: ${userId}`);
     
-    for (const [key, value] of Object.entries(responses)) {
-      if (lowerMessage.includes(key)) {
-        response = value;
-        break;
+    // Get session if exists
+    const sessionId = sessionStore.get(userId);
+    console.log(`Current session ID: ${sessionId || 'none'}`);
+    
+    // DashScope API credentials
+    const apiKey = process.env.DASHSCOPE_API_KEY || 'sk-8da8842dcb5f4c0bb6421fe2fd76e6d0';
+    const appId = 'c8159539b1194623b52be93606c4727d';
+    const url = `https://dashscope.aliyuncs.com/api/v1/apps/${appId}/completion`;
+    
+    console.log(`Processing request for message: ${message}`);
+    
+    try {
+      // Call DashScope API
+      const response = await axios.post(url, {
+        input: { 
+          prompt: message, 
+          session_id: sessionId || undefined 
+        },
+        parameters: {},
+        debug: {}
+      }, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Handle successful response
+      if (response.status === 200 && response.data && response.data.output) {
+        // Store session ID for future conversations
+        if (response.data.output.session_id) {
+          const newSessionId = response.data.output.session_id;
+          sessionStore.set(userId, newSessionId);
+          console.log(`New session ID stored: ${newSessionId} for user: ${userId}`);
+        }
+        
+        console.log('Response received from API');
+        
+        return res.json({
+          success: true,
+          response: response.data.output.text
+        });
+      } else {
+        throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
       }
+    } catch (apiError) {
+      console.error('API call failed:', apiError.message);
+      
+      // Fallback responses
+      const fallbackResponses = {
+        "hello": "Hello! How can I help you with office spaces today?",
+        "hi": "Hi there! Looking for an office space?",
+        "office": "We offer various office spaces from private offices to open floors.",
+        "price": "Our prices range from ¥3,000 to ¥15,000 per square meter monthly.",
+        "booking": "You can book through our website by clicking 'Book Viewing'.",
+        "default": "I'm here to help with your office space needs. What would you like to know?"
+      };
+      
+      // Find matching response or use default
+      let fallbackResponse = fallbackResponses.default;
+      const lowerMessage = message.toLowerCase();
+      
+      for (const [key, value] of Object.entries(fallbackResponses)) {
+        if (lowerMessage.includes(key)) {
+          fallbackResponse = value;
+          break;
+        }
+      }
+      
+      return res.json({
+        success: true,
+        response: fallbackResponse
+      });
     }
-    
-    return res.json({
-      success: true,
-      response: response
-    });
   } catch (error) {
     console.error('Error in AI response:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to generate AI response',
-      error: error.message
-    });
+    res.write(`event: error\ndata: ${JSON.stringify({
+      error: 'Internal server error'
+    })}\n\n`);
+    res.end();
   }
 };
+
+// 辅助函数：获取默认回复
+function getFallbackResponse(message) {
+  const fallbackResponses = {
+    "hello": "Hello! How can I help you with office spaces today?",
+    "hi": "Hi there! Looking for an office space?",
+    // ...其他默认回复
+  };
+  
+  const lowerMessage = message.toLowerCase();
+  for (const [key, value] of Object.entries(fallbackResponses)) {
+    if (lowerMessage.includes(key)) return value;
+  }
+  return fallbackResponses.default;
+}
 
 module.exports = {
   register,
   login,
   getProfile,
   getAIresponse,
+  updateProfile,
 };

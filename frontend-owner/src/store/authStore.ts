@@ -15,6 +15,7 @@ interface AuthState {
   logout: () => void;
   clearError: () => void;
   checkAuth: () => boolean;
+  updateUser: (userData: Partial<User>) => Promise<void>;
 }
 
 interface JwtPayload {
@@ -99,6 +100,26 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           get().logout();
           return false;
+        }
+      },
+      updateUser: async (userData: Partial<User>) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await api.updateProfile(userData);
+          
+          set((state) => ({ 
+            ...state,
+            user: { ...state.user, ...response.user },
+            isLoading: false 
+          }));
+          return response.user;
+        } catch (error) {
+          set((state) => ({ 
+            ...state,
+            error: error instanceof Error ? error.message : 'Failed to update profile',
+            isLoading: false 
+          }));
+          throw error;
         }
       },
     }),

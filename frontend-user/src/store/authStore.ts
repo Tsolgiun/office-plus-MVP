@@ -20,6 +20,7 @@ interface AuthState {
   toggleOfficeFavorite: (officeId: string) => Promise<boolean | undefined>;
   isBuildingFavorited: (buildingId: string) => boolean;
   isOfficeFavorited: (officeId: string) => boolean;
+  updateUser: (userData: Partial<User>) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -130,5 +131,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isOfficeFavorited: (officeId: string) => {
     const state = get();
     return state.favorites.offices.some(office => office._id === officeId);
+  },
+
+  updateUser: async (userData: Partial<User>) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.updateProfile(userData);
+      
+      set((state) => ({ 
+        ...state,
+        user: { ...state.user, ...response.user },
+        isLoading: false 
+      }));
+      return response.user;
+    } catch (error) {
+      set((state) => ({ 
+        ...state,
+        error: error instanceof Error ? error.message : 'Failed to update profile',
+        isLoading: false 
+      }));
+      throw error;
+    }
   },
 }));

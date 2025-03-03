@@ -133,6 +133,11 @@ class ApiService {
     return response.data;
   }
 
+  async updateProfile(userData: Partial<User>): Promise<any> {
+    const response: AxiosResponse<User> = await this.api.put('/auth/updateProfile', userData);
+    return response.data;
+  }
+  
   // Favorite endpoints
   async getFavorites(): Promise<UserFavorites> {
     const response: AxiosResponse<UserFavorites> = await this.api.get('/favorites');

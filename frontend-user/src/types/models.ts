@@ -2,6 +2,7 @@ export interface User {
   _id: string;
   username: string;
   email: string;
+  phone?: string;
   role: 'tenant' | 'owner' | 'admin' | 'user';
   favoriteBuildings: string[];
   favoriteOffices: string[];

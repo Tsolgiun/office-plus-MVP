@@ -14,6 +14,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
 import CreateAppointment from './pages/Appointment/CreateAppointment';
 import GetAppointment from './pages/Appointment/GetAppointment';
+import Profile from './pages/Profile/Profile';
 
 const theme = {
   token: {
@@ -61,8 +62,8 @@ const App: React.FC = () => {
                 
                 {/* Protected Routes */}
                 <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
-                <Route path="/appointments" element={<GetAppointment />} />
-                <Route path="/profile" element={<ProtectedRoute><div>Profile</div></ProtectedRoute>} />
+                <Route path="/appointments" element={<ProtectedRoute><GetAppointment /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               </Routes>
             </Suspense>
           </MainLayout>
