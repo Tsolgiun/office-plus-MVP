@@ -146,6 +146,41 @@ const updateProfile = async (req, res) => {
 };
 
 
+// Update user profile
+const updateProfile = async (req, res) => {
+  try {
+    const { username, email, phone } = req.body;
+    const userId = req.user._id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.username = username;
+    user.email = email;
+    user.phone = phone;
+
+    await user.save();
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        phone: user.phone
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error updating profile',
+      error: error.message
+    });
+  }
+};
+
+
 // AI response using predefined responses
 const getAIresponse = async (req, res) => {
   try {
@@ -158,82 +193,89 @@ const getAIresponse = async (req, res) => {
         message: 'No message provided'
       });
     }
-    
-    console.log(`User ID for session: ${userId}`);
-    
-    // Get session if exists
+
+    // 设置SSE响应头
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    // 获取已有的会话ID
     const sessionId = sessionStore.get(userId);
-    console.log(`Current session ID: ${sessionId || 'none'}`);
     
-    // DashScope API credentials
+    // API配置
     const apiKey = process.env.DASHSCOPE_API_KEY || 'sk-8da8842dcb5f4c0bb6421fe2fd76e6d0';
     const appId = 'c8159539b1194623b52be93606c4727d';
     const url = `https://dashscope.aliyuncs.com/api/v1/apps/${appId}/completion`;
-    
-    console.log(`Processing request for message: ${message}`);
-    
+
     try {
-      // Call DashScope API
+      // 调用DashScope API
       const response = await axios.post(url, {
         input: { 
           prompt: message, 
           session_id: sessionId || undefined 
         },
-        parameters: {},
+        parameters: {'incremental_output' : 'true'},
         debug: {}
       }, {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-DashScope-SSE': 'enable'
+        },
+        responseType: 'stream'
+      });
+
+      let fullResponse = '';
+      let receivedSessionId = null;
+
+      // 处理流式响应
+      response.data.on('data', (chunk) => {
+        try {
+          const chunkStr = chunk.toString().trim();
+          if (!chunkStr) return;
+
+          // 解析JSON格式的块数据
+          const eventData = JSON.parse(chunkStr);
+          
+          // 保存会话ID
+          if (eventData.output?.session_id) {
+            receivedSessionId = eventData.output.session_id;
+            sessionStore.set(userId, receivedSessionId);
+          }
+
+          // 发送增量输出
+          if (eventData.output?.text) {
+            fullResponse += eventData.output.text;
+            // 使用SSE格式发送数据
+            res.write(`data: ${JSON.stringify({ text: eventData.output.text })}\n\n`);
+          }
+        } catch (e) {
+          console.error('Error processing chunk:', e);
         }
       });
-      
-      // Handle successful response
-      if (response.status === 200 && response.data && response.data.output) {
-        // Store session ID for future conversations
-        if (response.data.output.session_id) {
-          const newSessionId = response.data.output.session_id;
-          sessionStore.set(userId, newSessionId);
-          console.log(`New session ID stored: ${newSessionId} for user: ${userId}`);
-        }
-        
-        console.log('Response received from API');
-        
-        return res.json({
-          success: true,
-          response: response.data.output.text
-        });
-      } else {
-        throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
-      }
+
+      // 流结束处理
+      response.data.on('end', () => {
+        console.log('Stream ended. Full response:', fullResponse);
+        res.write(`event: end\ndata: ${JSON.stringify({ sessionId: receivedSessionId })}\n\n`);
+        res.end();
+      });
+
+      // 错误处理
+      response.data.on('error', (err) => {
+        console.error('Stream error:', err);
+        res.write(`event: error\ndata: ${JSON.stringify({ error: 'API stream error' })}\n\n`);
+        res.end();
+      });
+
     } catch (apiError) {
       console.error('API call failed:', apiError.message);
-      
-      // Fallback responses
-      const fallbackResponses = {
-        "hello": "Hello! How can I help you with office spaces today?",
-        "hi": "Hi there! Looking for an office space?",
-        "office": "We offer various office spaces from private offices to open floors.",
-        "price": "Our prices range from ¥3,000 to ¥15,000 per square meter monthly.",
-        "booking": "You can book through our website by clicking 'Book Viewing'.",
-        "default": "I'm here to help with your office space needs. What would you like to know?"
-      };
-      
-      // Find matching response or use default
-      let fallbackResponse = fallbackResponses.default;
-      const lowerMessage = message.toLowerCase();
-      
-      for (const [key, value] of Object.entries(fallbackResponses)) {
-        if (lowerMessage.includes(key)) {
-          fallbackResponse = value;
-          break;
-        }
-      }
-      
-      return res.json({
-        success: true,
-        response: fallbackResponse
-      });
+      // 错误处理
+      res.write(`event: error\ndata: ${JSON.stringify({
+        error: 'Failed to connect to AI service',
+        fallback: getFallbackResponse(message)
+      })}\n\n`);
+      res.end();
     }
   } catch (error) {
     console.error('Error in AI response:', error);
