@@ -10,7 +10,12 @@ export interface Building {
   _id: string;
   name: string;
   location: {
-    address: string;
+    address: {
+      street: string;
+      region: string;
+      city: string;
+      fullAddress: string;
+    };
     metro: string;
     coordinates?: {
       lng: number;

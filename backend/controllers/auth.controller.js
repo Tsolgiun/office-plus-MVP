@@ -2,12 +2,22 @@ const User = require('../models/user.model');
 const jwt = require('jsonwebtoken');
 const { spawn } = require('child_process');
 const path = require('path');
-
+const axios = require('axios');
 // Generate JWT token
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
     expiresIn: '7d'
   });
+};
+
+const sessionStore = {
+  sessions: new Map(),
+  get(userId) {
+    return this.sessions.get(userId);
+  },
+  set(userId, sessionId) {
+    this.sessions.set(userId, sessionId);
+  }
 };
 
 // Register new user
@@ -110,41 +120,6 @@ const getProfile = async (req, res) => {
     });
   }
 };
-
-// Update user profile
-const updateProfile = async (req, res) => {
-  try {
-    const { username, email, phone } = req.body;
-    const userId = req.user._id;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    user.username = username;
-    user.email = email;
-    user.phone = phone;
-
-    await user.save();
-
-    res.json({
-      message: 'Profile updated successfully',
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        phone: user.phone
-      }
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Error updating profile',
-      error: error.message
-    });
-  }
-};
-
 
 // Update user profile
 const updateProfile = async (req, res) => {

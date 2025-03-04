@@ -123,7 +123,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <Logo to="/">office直租</Logo>
           <StyledMenu
             mode="horizontal"
-            selectedKeys={[location.pathname.split('/')[1] || 'buildings']}
+            selectedKeys={[location.pathname === '/' ? '' : location.pathname.split('/')[1]]}
             items={menuItems}
           />
         </HeaderSection>

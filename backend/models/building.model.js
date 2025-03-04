@@ -8,8 +8,25 @@ const buildingSchema = new mongoose.Schema({
   },
   location: {
     address: {
-      type: String,
-      required: true
+      street: {
+        type: String,
+        required: true,
+        trim: true
+      },
+      region: {
+        type: String,
+        required: true,
+        trim: true
+      },
+      city: {
+        type: String,
+        required: true,
+        trim: true
+      },
+      fullAddress: {
+        type: String,
+        required: true
+      }
     },
     metro: {
       type: String,

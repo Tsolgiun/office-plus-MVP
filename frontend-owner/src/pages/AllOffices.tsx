@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import type { ColumnsType } from 'antd/es/table';
 import { Office, Building } from '../types/models';
 import { api } from '../services/api';
-
 const { Title } = Typography;
 const { Option } = Select;
 
@@ -32,6 +31,7 @@ const AllOffices: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const navigate = useNavigate();
 
+
   const fetchData = async () => {
     try {
       setRefreshing(true);
@@ -52,10 +52,10 @@ const AllOffices: React.FC = () => {
       const flattenedOffices = allOffices.flat();
       setOffices(flattenedOffices);
       setFilteredOffices(flattenedOffices);
-      message.success('数据加载成功');
+      // message.success('数据加载成功');
     } catch (error) {
       console.error('Error fetching offices:', error);
-      message.error('加载数据失败，请重试');
+      // message.error('加载数据失败，请重试');
     } finally {
       setLoading(false);
       setRefreshing(false);

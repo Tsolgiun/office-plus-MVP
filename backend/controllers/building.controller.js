@@ -231,6 +231,7 @@ const updateBuilding = async (req, res) => {
     // Update fields
     Object.keys(req.body).forEach(key => {
       building[key] = req.body[key];
+     
     });
 
     await building.save();

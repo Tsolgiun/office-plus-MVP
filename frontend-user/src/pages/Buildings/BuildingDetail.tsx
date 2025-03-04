@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Typography, Spin, Descriptions, Tag, Row, Col, Card, Empty, Button, Space } from 'antd';
@@ -247,7 +246,10 @@ const BuildingDetail: React.FC = () => {
             <Title level={2}>Building Information</Title>
             <Descriptions column={1}>
               <Descriptions.Item label="Location">
-                <EnvironmentOutlined /> {building.location?.address} {building.location?.metro && `(${building.location.metro})`}
+                <EnvironmentOutlined /> {typeof building.location?.address === 'string' 
+                  ? building.location.address 
+                  : (building.location?.address as any)?.fullAddress || ''
+                } {building.location?.metro && `(${building.location.metro})`}
               </Descriptions.Item>
               <Descriptions.Item label="Area Range">
                 <HomeOutlined /> {building.areaRange?.min ?? 0} - {building.areaRange?.max ?? 0} ㎡
@@ -257,10 +259,15 @@ const BuildingDetail: React.FC = () => {
               </Descriptions.Item>
             </Descriptions>
 
-            {building.location?.coordinates && (
+            {building.location?.coordinates && 
+              typeof building.location.coordinates.lat === 'number' && 
+              typeof building.location.coordinates.lng === 'number' && (
               <div style={{ marginTop: '16px' }}>
                 <AMapComponent
-                  initialLocation={building.location.coordinates}
+                  initialLocation={{
+                    lat: building.location.coordinates.lat,
+                    lng: building.location.coordinates.lng
+                  }}
                   readOnly
                   style={{ height: '300px', borderRadius: '8px' }}
                 />

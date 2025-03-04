@@ -261,7 +261,7 @@ const Dashboard: React.FC = () => {
                   <List.Item>
                     <List.Item.Meta
                       title={building.name}
-                      description={building.location.address}
+                      description={building.location.address.fullAddress}
                     />
                     <div>
                       {building.tags.map(tag => (

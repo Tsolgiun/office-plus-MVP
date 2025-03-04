@@ -195,7 +195,7 @@ const OfficeDetail: React.FC = () => {
   const handleBooking = () => {
     if (!isLoggedIn) {
       message.info('Please login to book a viewing');
-      navigate('/login', { state: { from: location } });
+      navigate('/login');
       return;
     }
     setIsModalVisible(true);

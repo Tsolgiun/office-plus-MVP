@@ -15,6 +15,7 @@ import { useAuthStore } from './store/authStore';
 import CreateAppointment from './pages/Appointment/CreateAppointment';
 import GetAppointment from './pages/Appointment/GetAppointment';
 import Profile from './pages/Profile/Profile';
+import Home from './pages/Home';
 
 const theme = {
   token: {
@@ -50,7 +51,7 @@ const App: React.FC = () => {
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 {/* Public Routes */}
-                <Route path="/" element={<Buildings />} />
+                <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/buildings" element={<Buildings />} />

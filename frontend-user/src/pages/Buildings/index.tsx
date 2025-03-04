@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Typography, Input, Select, Empty, Spin } from 'antd';
+import { Row, Col, Typography, Input, Select, Empty, Spin, Button, Tag } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import BuildingCard from '../../components/BuildingCard';
@@ -51,11 +51,82 @@ const StyledSelect = styled(Select<string>)`
   margin-top: 16px;
 `;
 
+const FilterButtonsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+  width: 100%;
+  text-align: left;
+`;
+
+const FilterSection = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+  width: 100%;
+`;
+
+const FilterLabel = styled(Typography.Text)`
+  font-weight: 500;
+  min-width: 50px;
+`;
+
+const FilterTagsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+`;
+
+const StyledTag = styled(Tag)`
+  cursor: pointer;
+  margin-bottom: 4px;
+  padding: 5px 12px;
+  font-size: 14px;
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const ClearButtonContainer = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+`;
+
+// Define a type for the address object
+interface AddressObject {
+  fullAddress?: string;
+  city?: string;
+  region?: string;
+  street?: string;
+  [key: string]: any; // To allow for other potential fields
+}
+
+// Define a type for the extended location
+interface ExtendedLocation {
+  address?: string | { [key: string]: any };
+  addressDetails?: AddressObject;
+  metro: string;
+  coordinates?: {
+    lng: number;
+    lat: number;
+  };
+}
+
 const Buildings: React.FC = () => {
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<string>('name');
+  
+  // New state for filters
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedStreet, setSelectedStreet] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBuildings = async () => {
@@ -72,12 +143,129 @@ const Buildings: React.FC = () => {
     fetchBuildings();
   }, []);
 
+  // Extract unique cities, regions and streets from buildings data
+  const getLocationFilters = () => {
+    const cities = new Set<string>();
+    const regions = new Set<string>();
+    const streets = new Set<string>();
+
+    buildings.forEach(building => {
+      const address = building.location.address;
+      
+      // Process address if it's an object
+      if (address && typeof address === 'object') {
+        const addrObj = address as any;
+        if (addrObj.city) cities.add(addrObj.city);
+        if (addrObj.region) regions.add(addrObj.region);
+        if (addrObj.street && addrObj.street !== 'Unknown Street') streets.add(addrObj.street);
+      } 
+      
+    });
+
+    return {
+      cities: Array.from(cities),
+      regions: Array.from(regions),
+      streets: Array.from(streets)
+    };
+  };
+
+  const filters = getLocationFilters();
+
+  // Handle filter clicks
+  const handleCityClick = (city: string) => {
+    setSelectedCity(selectedCity === city ? null : city);
+  };
+
+  const handleRegionClick = (region: string) => {
+    setSelectedRegion(selectedRegion === region ? null : region);
+  };
+
+  const handleStreetClick = (street: string) => {
+    setSelectedStreet(selectedStreet === street ? null : street);
+  };
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setSelectedCity(null);
+    setSelectedRegion(null);
+    setSelectedStreet(null);
+  };
+
   const sortedAndFilteredBuildings = buildings
-    .filter(building => 
-      building.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      building.location.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      building.location.metro.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    .filter(building => {
+      // Apply existing search term filter
+      const searchTermLower = searchTerm.toLowerCase();
+      
+      const nameMatches = building.name.toLowerCase().includes(searchTermLower);
+      const metroMatches = building.location.metro.toLowerCase().includes(searchTermLower);
+      
+      let addressMatches = false;
+      
+      // Get the address information
+      const address = building.location.address;
+      const addressDetails = (building.location as any).addressDetails;
+      
+      // Get address components from both possible locations
+      let city = '';
+      let region = '';
+      let street = '';
+      let fullAddress = '';
+      
+      // Process address if it's an object
+      if (address && typeof address === 'object') {
+        const addrObj = address as any;
+        city = addrObj.city || '';
+        region = addrObj.region || '';
+        street = addrObj.street || '';
+        fullAddress = addrObj.fullAddress || '';
+        
+        addressMatches = 
+          fullAddress.toLowerCase().includes(searchTermLower) ||
+          city.toLowerCase().includes(searchTermLower) ||
+          region.toLowerCase().includes(searchTermLower) ||
+          street.toLowerCase().includes(searchTermLower);
+      } 
+      // Process address if it's a string
+      else if (address && typeof address === 'string') {
+        addressMatches = address.toLowerCase().includes(searchTermLower);
+      }
+      
+      // Process addressDetails if it exists
+      if (addressDetails) {
+        city = addressDetails.city || city;
+        region = addressDetails.region || region;
+        street = addressDetails.street || street;
+        fullAddress = addressDetails.fullAddress || fullAddress;
+        
+        addressMatches = addressMatches || 
+          fullAddress.toLowerCase().includes(searchTermLower) ||
+          city.toLowerCase().includes(searchTermLower) ||
+          region.toLowerCase().includes(searchTermLower) ||
+          street.toLowerCase().includes(searchTermLower);
+      }
+      
+      const searchMatches = nameMatches || metroMatches || addressMatches;
+      
+      // Apply location filters
+      let cityMatches = true;
+      let regionMatches = true;
+      let streetMatches = true;
+      
+      // Apply filters using the extracted values
+      if (selectedCity) {
+        cityMatches = city === selectedCity;
+      }
+      
+      if (selectedRegion) {
+        regionMatches = region === selectedRegion;
+      }
+      
+      if (selectedStreet) {
+        streetMatches = street === selectedStreet;
+      }
+      
+      return searchMatches && cityMatches && regionMatches && streetMatches;
+    })
     .sort((a, b) => {
       switch (sortBy) {
         case 'price-asc':
@@ -129,6 +317,73 @@ const Buildings: React.FC = () => {
           <Typography.Text>
             探索我们优质的办公楼宇，找到最适合你的办公场所
           </Typography.Text>
+          
+          {!loading && (
+            <FilterButtonsContainer>
+              {(selectedCity || selectedRegion || selectedStreet) && (
+                <ClearButtonContainer>
+                  <Button 
+                    type="primary" 
+                    ghost 
+                    onClick={clearAllFilters}
+                  >
+                    清除所有筛选
+                  </Button>
+                </ClearButtonContainer>
+              )}
+              
+              {filters.cities.length > 0 && (
+                <FilterSection>
+                  <FilterLabel>城市:</FilterLabel>
+                  <FilterTagsContainer>
+                    {filters.cities.map(city => (
+                      <StyledTag
+                        key={city}
+                        color={selectedCity === city ? '#1890ff' : 'default'}
+                        onClick={() => handleCityClick(city)}
+                      >
+                        {city}
+                      </StyledTag>
+                    ))}
+                  </FilterTagsContainer>
+                </FilterSection>
+              )}
+              
+              {filters.regions.length > 0 && (
+                <FilterSection>
+                  <FilterLabel>区域:</FilterLabel>
+                  <FilterTagsContainer>
+                    {filters.regions.map(region => (
+                      <StyledTag
+                        key={region}
+                        color={selectedRegion === region ? '#1890ff' : 'default'}
+                        onClick={() => handleRegionClick(region)}
+                      >
+                        {region}
+                      </StyledTag>
+                    ))}
+                  </FilterTagsContainer>
+                </FilterSection>
+              )}
+              
+              {filters.streets.length > 0 && (
+                <FilterSection>
+                  <FilterLabel>街道:</FilterLabel>
+                  <FilterTagsContainer>
+                    {filters.streets.map(street => (
+                      <StyledTag
+                        key={street}
+                        color={selectedStreet === street ? '#1890ff' : 'default'}
+                        onClick={() => handleStreetClick(street)}
+                      >
+                        {street}
+                      </StyledTag>
+                    ))}
+                  </FilterTagsContainer>
+                </FilterSection>
+              )}
+            </FilterButtonsContainer>
+          )}
         </WelcomeSection>
 
         {sortedAndFilteredBuildings.length === 0 ? (

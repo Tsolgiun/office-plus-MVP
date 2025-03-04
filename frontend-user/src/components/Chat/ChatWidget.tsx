@@ -28,7 +28,7 @@ const ChatButton = styled.button`
   }
 `;
 
-const ChatWindow = styled.div<{ isOpen: boolean }>`
+const ChatWindow = styled.div<{ $isOpen: boolean }>`
   position: fixed;
   bottom: 100px;
   right: 20px;
@@ -37,7 +37,7 @@ const ChatWindow = styled.div<{ isOpen: boolean }>`
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  display: ${props => props.isOpen ? 'flex' : 'none'};
+  display: ${props => props.$isOpen ? 'flex' : 'none'};
   flex-direction: column;
   overflow: hidden;
 `;
@@ -90,11 +90,11 @@ const ChatInput = styled.div`
   }
 `;
 
-const Message = styled.div<{ isUser: boolean }>`
+const Message = styled.div<{ $isUser: boolean }>`
   max-width: 80%;
   padding: 12px 16px;
   border-radius: 16px;
-  ${props => props.isUser ? `
+  ${props => props.$isUser ? `
     background: #007bff;
     color: white;
     align-self: flex-end;
@@ -280,7 +280,7 @@ export const ChatWidget = () => {
 
   const renderMessages = () => {
     return messages.map((msg, index) => (
-      <Message key={index} isUser={msg.isUser}>
+      <Message key={index} $isUser={msg.isUser}>
         {msg.isUser ? (
           msg.text
         ) : (
@@ -306,7 +306,7 @@ export const ChatWidget = () => {
         {isOpen ? '×' : '💬'}
       </ChatButton>
       
-      <ChatWindow isOpen={isOpen}>
+      <ChatWindow $isOpen={isOpen}>
         <ChatHeader>Office+ Support</ChatHeader>
         
         <ChatMessages>

@@ -41,9 +41,6 @@ const createAppointment = async (req, res) => {
 const getUserAppointments = async (req, res) => {
   try {
     const { userId } = req.params;
-    console.log("here we go !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    console.log(userId);
-    
     
     const appointments = await Appointment.find({ userId: userId })
       
@@ -70,8 +67,6 @@ const getBuildingAppointments = async (req, res) => {
     const appointments = await Appointment.find({ 
       building: buildingId, 
     }).populate('userId', 'name email');
-    console.log("here we go !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    console.log(appointments);
     
     return res.json({
       success: true,

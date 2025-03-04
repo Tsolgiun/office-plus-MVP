@@ -84,7 +84,7 @@ const BuildingCard: React.FC<BuildingCardProps> = ({ building }) => {
           <Space direction="vertical" style={{ width: '100%' }}>
             <InfoRow>
               <EnvironmentOutlined />
-              <Text>{location.address}</Text>
+              <Text>{typeof location.address === 'string' ? location.address : (location.address as any).fullAddress}</Text>
             </InfoRow>
             <InfoRow>
               <HomeOutlined />

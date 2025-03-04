@@ -74,12 +74,35 @@ const Buildings: React.FC = () => {
       title: '地址',
       dataIndex: 'location',
       key: 'location',
-      render: (location: { address: string; metro: string }) => (
-        <div>
-          <div>{location.address}</div>
-          <small>Metro: {location.metro}</small>
-        </div>
-      ),
+      render: (location: any) => {
+        let addressText = '';
+        
+        // Handle both string and object address formats
+        if (location?.address) {
+          if (typeof location.address === 'string') {
+            addressText = location.address;
+          } else if (location.address.fullAddress) {
+            // Use fullAddress if available
+            addressText = location.address.fullAddress;
+          } else if (location.addressDetails?.fullAddress) {
+            // Try alternate structure
+            addressText = location.addressDetails.fullAddress;
+          } else {
+            // Fallback: construct from components
+            const city = location.address.city || '';
+            const region = location.address.region || '';
+            const street = location.address.street || '';
+            addressText = `${city}${region}${street}`;
+          }
+        }
+        
+        return (
+          <div>
+            <div>{addressText}</div>
+            <small>Metro: {location.metro}</small>
+          </div>
+        );
+      },
     },
     {
       title: '价格范围',

@@ -36,13 +36,41 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
   const handleLocationSelect = (location: { lng: number; lat: number }, address?: string) => {
     setCurrentLocation(location);
     const currentLocation = form.getFieldValue('location') || {};
-    form.setFieldsValue({
-      location: {
-        ...currentLocation,
-        coordinates: location,
-        address: address || currentLocation.address
-      }
-    });
+    
+    // Parse address into components if address is provided
+    if (address) {
+      // Chinese addresses typically follow format: [City][Region][Street]
+      // e.g., "深圳市南山区科技园路"
+      const cityMatch = address.match(/^(.*?市)/);
+      const city = cityMatch ? cityMatch[1] : '';
+      
+      let remainingAddress = address.replace(city, '');
+      const regionMatch = remainingAddress.match(/^(.*?区|.*?县)/);
+      const region = regionMatch ? regionMatch[1] : '';
+      
+      const street = remainingAddress.replace(region, '');
+      
+      form.setFieldsValue({
+        location: {
+          ...currentLocation,
+          coordinates: location,
+          address: address,
+          addressDetails: {
+            city: city,
+            region: region,
+            street: street,
+            fullAddress: address
+          }
+        }
+      });
+    } else {
+      form.setFieldsValue({
+        location: {
+          ...currentLocation,
+          coordinates: location
+        }
+      });
+    }
   };
 
   const onFinish = async (values: any) => {
@@ -136,28 +164,57 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
 
       <Form.Item
         label="地址信息"
-        required
+        required={true}
+        style={{ marginBottom: 0 }}
       >
-        <Input.Group compact>
-          <Form.Item
-            name={['location', 'address']}
-            rules={[{ required: true, message: '请输入地址' }]}
-            style={{ marginBottom: 0 }}
-          >
-            <Input placeholder="地址" style={{ width: '70%' }} />
-          </Form.Item>
-          <Form.Item
-            name={['location', 'metro']}
-            rules={[{ required: true, message: '请输入最近的地铁' }]}
-            style={{ marginBottom: 0 }}
-          >
-            <Input placeholder="最近的地铁" style={{ width: '30%' }} />
-          </Form.Item>
-        </Input.Group>
+        <Form.Item
+          name={['location', 'addressDetails', 'city']}
+          label="城市"
+          rules={[{ required: true, message: '请输入城市' }]}
+          style={{ marginBottom: 16 }}
+        >
+          <Input placeholder="例如：深圳市" style={{ width: '100%' }} disabled />
+        </Form.Item>
+        
+        <Form.Item
+          name={['location', 'addressDetails', 'region']}
+          label="区域"
+          rules={[{ required: true, message: '请输入区域' }]}
+          style={{ marginBottom: 16 }}
+        >
+          <Input placeholder="例如：南山区" style={{ width: '100%' }} disabled />
+        </Form.Item>
+        
+        <Form.Item
+          name={['location', 'addressDetails', 'street']}
+          label="街道地址"
+          rules={[{ required: true, message: '请输入详细街道地址' }]}
+          style={{ marginBottom: 16 }}
+        >
+          <Input placeholder="输入详细街道地址" style={{ width: '100%' }} />
+        </Form.Item>
+        
+        <Form.Item
+          name={['location', 'addressDetails', 'fullAddress']}
+          label="完整地址"
+          rules={[{ required: true, message: '请输入完整地址' }]}
+          style={{ marginBottom: 16 }}
+        >
+          <Input placeholder="完整地址（自动填充）" style={{ width: '100%' }} disabled />
+        </Form.Item>
+        
+        <Form.Item
+          name={['location', 'metro']}
+          label="附近地铁站"
+          rules={[{ required: true, message: '请输入最近的地铁' }]}
+          style={{ marginBottom: 0 }}
+        >
+          <Input placeholder="输入最近的地铁站" style={{ width: '100%' }} />
+        </Form.Item>
       </Form.Item>
 
       <Form.Item label="价格区间 (¥/㎡/月)" required>
-        <Input.Group compact>
+        <Space.Compact>
           <Form.Item
             name={['priceRange', 'min']}
             rules={[{ required: true, message: '请输入价格最小值' }]}
@@ -180,11 +237,11 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
               min={0}
             />
           </Form.Item>
-        </Input.Group>
+        </Space.Compact>
       </Form.Item>
 
       <Form.Item label="面积区间 (㎡)" required>
-        <Input.Group compact>
+        <Space.Compact>
           <Form.Item
             name={['areaRange', 'min']}
             rules={[{ required: true, message: '请输入面积最小值' }]}
@@ -207,7 +264,7 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
               min={0}
             />
           </Form.Item>
-        </Input.Group>
+        </Space.Compact>
       </Form.Item>
 
       <Form.Item
