@@ -5,6 +5,7 @@ import { Building } from '../types/models';
 import { api } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import ImageUpload from './ImageUpload';
+import AMapComponent from './AMapComponent';
 
 const { TextArea } = Input;
 
@@ -14,11 +15,17 @@ interface BuildingFormProps {
   onSuccess?: () => void;
 }
 
+const DEFAULT_LOCATION = {
+  lng: 116.397428,
+  lat: 39.90923
+};
+
 const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSuccess }) => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [buildingId, setBuildingId] = useState<string | null>(initialValues?._id || null);
+  const [currentLocation, setCurrentLocation] = useState(initialValues?.location?.coordinates || DEFAULT_LOCATION);
 
   useEffect(() => {
     if (initialValues) {
@@ -26,11 +33,32 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
     }
   }, [initialValues, form]);
 
+  const handleLocationSelect = (location: { lng: number; lat: number }, address?: string) => {
+    setCurrentLocation(location);
+    const currentLocation = form.getFieldValue('location') || {};
+    form.setFieldsValue({
+      location: {
+        ...currentLocation,
+        coordinates: location,
+        address: address || currentLocation.address
+      }
+    });
+  };
+
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
+      // Ensure coordinates are included in the form data
+      const formData = {
+        ...values,
+        location: {
+          ...values.location,
+          coordinates: currentLocation
+        }
+      };
+
       if (mode === 'create') {
-        const building = await api.createBuilding(values);
+        const building = await api.createBuilding(formData);
         setBuildingId(building._id);
         message.success('Building created successfully. You can now upload images.');
         // Don't navigate away in create mode - allow image upload first
@@ -38,7 +66,7 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
         if (!initialValues?._id) {
           throw new Error('Building ID not found');
         }
-        await api.updateBuilding(initialValues._id, values);
+        await api.updateBuilding(initialValues._id, formData);
         message.success('Building updated successfully');
         onSuccess?.();
         // Only navigate away in edit mode
@@ -81,6 +109,9 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
         amenities: [],
         tags: [],
         photos: [],
+        location: {
+          coordinates: DEFAULT_LOCATION
+        },
         ...initialValues
       }}
     >
@@ -93,7 +124,18 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
       </Form.Item>
 
       <Form.Item
-        label="地址"
+        label="位置选择"
+        tooltip="搜索地址或点击地图选择位置"
+      >
+        <AMapComponent
+          initialLocation={currentLocation}
+          onLocationSelect={handleLocationSelect}
+          showSearch={true}
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="地址信息"
         required
       >
         <Input.Group compact>

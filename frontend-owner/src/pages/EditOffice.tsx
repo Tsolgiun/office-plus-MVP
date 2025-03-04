@@ -8,7 +8,7 @@ import { api } from '../services/api';
 const { Title } = Typography;
 
 const EditOffice: React.FC = () => {
-  const { buildingId, officeId } = useParams<{ buildingId: string; officeId: string }>();
+  const { buildingId: urlBuildingId, officeId } = useParams<{ buildingId: string; officeId: string }>();
   const navigate = useNavigate();
   const [office, setOffice] = useState<Office | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,18 +23,18 @@ const EditOffice: React.FC = () => {
         setOffice(officeData);
       } catch (error) {
         console.error('Error fetching office:', error);
-        navigate(`/buildings/${buildingId}/offices`);
+        if (urlBuildingId) {
+          navigate(`/buildings/${urlBuildingId}/offices`);
+        } else {
+          navigate('/offices');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchOffice();
-  }, [officeId, buildingId, navigate]);
-
-  if (!buildingId) {
-    return <div>Building ID not found</div>;
-  }
+  }, [officeId, urlBuildingId, navigate]);
 
   if (loading) {
     return (
@@ -46,6 +46,12 @@ const EditOffice: React.FC = () => {
 
   if (!office) {
     return null;
+  }
+
+  // Ensure we have a building ID either from URL or office data
+  const buildingId = urlBuildingId || office.buildingId;
+  if (!buildingId) {
+    return <div>Building ID not found</div>;
   }
 
   return (

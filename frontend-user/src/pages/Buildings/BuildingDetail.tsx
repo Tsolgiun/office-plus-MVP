@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Typography, Spin, Descriptions, Tag, Row, Col, Card, Empty, Button, Space } from 'antd';
@@ -6,6 +7,7 @@ import FavoriteButton from '../../components/FavoriteButton';
 import styled from 'styled-components';
 import { Building, Office } from '../../types/models';
 import { api } from '../../services/api';
+import AMapComponent from '../../components/AMapComponent';
 
 const { Title, Text } = Typography;
 
@@ -254,6 +256,16 @@ const BuildingDetail: React.FC = () => {
                 {building.amenities?.join(', ') || 'None'}
               </Descriptions.Item>
             </Descriptions>
+
+            {building.location?.coordinates && (
+              <div style={{ marginTop: '16px' }}>
+                <AMapComponent
+                  initialLocation={building.location.coordinates}
+                  readOnly
+                  style={{ height: '300px', borderRadius: '8px' }}
+                />
+              </div>
+            )}
           </ContentSection>
 
           <ContentSection>
@@ -265,7 +277,7 @@ const BuildingDetail: React.FC = () => {
                 {offices.map(office => (
                   <Col xs={24} sm={12} key={office._id}>
                     <OfficeCard
-                      onClick={() => navigate(`/buildings/${building._id}/offices/${office._id}`)}
+                      onClick={() => navigate(`/offices/${office._id}`)}
                       cover={
                         <div style={{ position: 'relative' }}>
                           <img 

@@ -1,11 +1,7 @@
 const User = require('../models/user.model');
 const jwt = require('jsonwebtoken');
-const axios = require('axios'); // Make sure axios is installed: npm install axios
 const { spawn } = require('child_process');
 const path = require('path');
-
-// Store session IDs for conversations
-const sessionStore = new Map();
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -150,7 +146,41 @@ const updateProfile = async (req, res) => {
 };
 
 
-// Generate AI response using JavaScript implementation
+// Update user profile
+const updateProfile = async (req, res) => {
+  try {
+    const { username, email, phone } = req.body;
+    const userId = req.user._id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.username = username;
+    user.email = email;
+    user.phone = phone;
+
+    await user.save();
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        phone: user.phone
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error updating profile',
+      error: error.message
+    });
+  }
+};
+
+
 const getAIresponse = async (req, res) => {
   try {
     const { message } = req.params;
