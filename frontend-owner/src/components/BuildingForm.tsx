@@ -54,8 +54,7 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
         location: {
           ...currentLocation,
           coordinates: location,
-          address: address,
-          addressDetails: {
+          address: {
             city: city,
             region: region,
             street: street,
@@ -168,7 +167,7 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
         style={{ marginBottom: 0 }}
       >
         <Form.Item
-          name={['location', 'addressDetails', 'city']}
+          name={['location', 'address', 'city']}
           label="城市"
           rules={[{ required: true, message: '请输入城市' }]}
           style={{ marginBottom: 16 }}
@@ -177,7 +176,7 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
         </Form.Item>
         
         <Form.Item
-          name={['location', 'addressDetails', 'region']}
+          name={['location', 'address', 'region']}
           label="区域"
           rules={[{ required: true, message: '请输入区域' }]}
           style={{ marginBottom: 16 }}
@@ -186,7 +185,7 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
         </Form.Item>
         
         <Form.Item
-          name={['location', 'addressDetails', 'street']}
+          name={['location', 'address', 'street']}
           label="街道地址"
           rules={[{ required: true, message: '请输入详细街道地址' }]}
           style={{ marginBottom: 16 }}
@@ -195,7 +194,7 @@ const BuildingForm: React.FC<BuildingFormProps> = ({ initialValues, mode, onSucc
         </Form.Item>
         
         <Form.Item
-          name={['location', 'addressDetails', 'fullAddress']}
+          name={['location', 'address', 'fullAddress']}
           label="完整地址"
           rules={[{ required: true, message: '请输入完整地址' }]}
           style={{ marginBottom: 16 }}

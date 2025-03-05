@@ -7,6 +7,13 @@ import { api } from '../services/api';
 
 const { Title } = Typography;
 
+const statusMap: Record<string, string> = {
+  'available': '可用',
+  'rented': '已租',
+  'pending': '待处理',
+  'maintenance': '维护中'
+};
+
 const Offices: React.FC = () => {
   const { buildingId } = useParams<{ buildingId: string }>();
   const [offices, setOffices] = useState<Office[]>([]);
@@ -73,41 +80,41 @@ const Offices: React.FC = () => {
 
   const columns = [
     {
-      title: 'Floor',
+      title: '楼层',
       dataIndex: 'floor',
       key: 'floor',
       render: (floor: number) => `${floor}F`,
     },
     {
-      title: 'Area',
+      title: '面积',
       dataIndex: 'area',
       key: 'area',
       render: (area: number) => `${area}㎡`,
     },
     {
-      title: 'Price',
+      title: '单价',
       dataIndex: 'pricePerUnit',
       key: 'pricePerUnit',
       render: (price: number) => `¥${price}/㎡/月`,
     },
     {
-      title: 'Total Price',
+      title: '总价',
       dataIndex: 'totalPrice',
       key: 'totalPrice',
       render: (price: number) => `¥${price}/月`,
     },
     {
-      title: 'Status',
+      title: '状态',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
         <Tag color={getStatusColor(status)}>
-          {status.toUpperCase()}
+            {statusMap[status] || '未知'}
         </Tag>
       ),
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'action',
       render: (_: any, record: Office) => (
         <Space size="middle">
@@ -138,7 +145,7 @@ const Offices: React.FC = () => {
       <Space direction="vertical" style={{ width: '100%' }} size="large">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space direction="vertical" size="small">
-            <Title level={2}>Offices</Title>
+            <Title level={2}>办公室</Title>
             {building && (
               <Typography.Text type="secondary">
                 写字楼: {building.name}

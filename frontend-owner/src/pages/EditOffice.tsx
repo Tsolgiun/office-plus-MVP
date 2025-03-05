@@ -56,7 +56,7 @@ const EditOffice: React.FC = () => {
 
   return (
     <Card>
-      <Title level={2}>Edit Office</Title>
+      <Title level={2}>更改办公室</Title>
       <OfficeForm
         mode="edit"
         buildingId={buildingId}

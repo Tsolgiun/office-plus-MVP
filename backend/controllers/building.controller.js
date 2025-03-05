@@ -95,7 +95,7 @@ const createBuilding = async (req, res) => {
       owner: req.user._id,
       photos
     });
-
+    console.log('Create Building - Building:', req.body);
     await building.save();
     res.status(201).json({
       message: 'Building created successfully',

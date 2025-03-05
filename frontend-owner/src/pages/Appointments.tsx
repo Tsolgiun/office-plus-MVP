@@ -89,8 +89,7 @@ const Appointments: React.FC = () => {
         
         for (const building of buildingsData) {
           const buildingAppointments = await api.getBuildingAppointments(building._id);
-          console.log(buildingAppointments);
-          console.log(building._id);
+          
           if (buildingAppointments.appointments) {
             fetchedAppointments = [...fetchedAppointments, ...buildingAppointments.appointments];
           }

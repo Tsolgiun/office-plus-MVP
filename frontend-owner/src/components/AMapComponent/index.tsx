@@ -55,10 +55,17 @@ const AMapComponent: React.FC<AMapProps> = ({
 
   // Update marker and map position when initialLocation changes
   useEffect(() => {
-    if (marker.current && mapInstance.current) {
-      const position: [number, number] = [initialLocation.lng, initialLocation.lat];
-      marker.current.setPosition(position);
-      mapInstance.current.setCenter(position);
+    if (marker.current && mapInstance.current && initialLocation) {
+      const lng = Number(initialLocation.lng);
+      const lat = Number(initialLocation.lat);
+      
+      if (isFinite(lng) && isFinite(lat)) {
+        const position: [number, number] = [lng, lat];
+        marker.current.setPosition(position);
+        mapInstance.current.setCenter(position);
+      } else {
+        console.warn('Invalid coordinates detected:', initialLocation);
+      }
     }
   }, [initialLocation]);
 
@@ -102,11 +109,15 @@ const AMapComponent: React.FC<AMapProps> = ({
     if (!readOnly && mapInstance.current) {
       // Add click handler for location selection
       mapInstance.current.on('click', (e: AMap.MapEvent) => {
+        if (!e.lnglat || !isFinite(e.lnglat.lng) || !isFinite(e.lnglat.lat)) {
+          console.warn('Invalid map click coordinates');
+          return;
+        }
+        
         const lnglat = e.lnglat;
         if (marker.current && mapInstance.current) {
           const position: [number, number] = [lnglat.lng, lnglat.lat];
           marker.current.setPosition(position);
-          mapInstance.current.setCenter(position);
           updateAddressFromLocation(lnglat);
         }
       });
@@ -173,8 +184,8 @@ const AMapComponent: React.FC<AMapProps> = ({
     }
   };
 
-  const updateAddressFromLocation = (lnglat: AMap.LngLat) => {
-    if (!geocoder.current) return;
+  const updateAddressFromLocation = (lnglat: AMap.MapEvent['lnglat']) => {
+    if (!geocoder.current || !lnglat || !isFinite(lnglat.lng) || !isFinite(lnglat.lat)) return;
     
     geocoder.current.getAddress([lnglat.lng, lnglat.lat], (status: string, result: AMap.ReGeocodeResult) => {
       if (status === 'complete' && result.regeocode) {

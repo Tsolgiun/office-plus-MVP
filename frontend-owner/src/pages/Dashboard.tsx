@@ -5,7 +5,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { Building, Office } from '../types/models';
 import styled from 'styled-components';
-// import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import dayjs from 'dayjs';
 import { ColumnsType } from 'antd/es/table';
 
@@ -17,7 +16,12 @@ const StyledCard = styled(Card)`
     cursor: pointer;
   }
 `;
-
+const statusMap: Record<string, string> = {
+  'available': '可用',
+  'rented': '已租',
+  'pending': '待处理',
+  'maintenance': '维护中'
+};
 // Define your appointment interface
 interface Appointment {
   _id: string;
@@ -40,18 +44,6 @@ const statusColors: Record<string, string> = {
   cancelled: 'red',
   completed: 'blue',
   rejected: 'magenta',
-};
-
-// Status text mapping
-const getStatusText = (status: string): string => {
-  const statusMap: Record<string, string> = {
-    pending: '待确认',
-    confirmed: '已确认',
-    cancelled: '已取消',
-    completed: '已完成',
-    rejected: '已拒绝',
-  };
-  return statusMap[status] || status;
 };
 
 const Dashboard: React.FC = () => {
@@ -152,15 +144,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Prepare data for pie chart
-  const chartData = [
-    { name: '待确认', value: appointmentStats.pending, color: statusColors.pending },
-    { name: '已确认', value: appointmentStats.confirmed, color: statusColors.confirmed },
-    { name: '已完成', value: appointmentStats.completed, color: statusColors.completed },
-    { name: '已取消', value: appointmentStats.cancelled, color: statusColors.cancelled },
-    { name: '已拒绝', value: appointmentStats.rejected, color: statusColors.rejected }
-  ].filter(item => item.value > 0);
-
   // Define columns for recent appointments table
   const columns: ColumnsType<Appointment> = [
     {
@@ -189,7 +172,7 @@ const Dashboard: React.FC = () => {
       key: 'status',
       render: (record: Appointment) => (
         <Tag color={statusColors[record.status] || 'default'}>
-          {getStatusText(record.status)}
+          {statusMap[record.status] || '未知'}
         </Tag>
       )
     },
@@ -290,7 +273,7 @@ const Dashboard: React.FC = () => {
                       description={`¥${office.pricePerUnit}/㎡/月`}
                     />
                     <Tag color={getStatusColor(office.status)}>
-                      {office.status.toUpperCase()}
+                        {statusMap[office.status] || '未知'}
                     </Tag>
                   </List.Item>
                 </StyledCard>
